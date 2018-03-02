@@ -3,7 +3,7 @@ var router = express.Router();
 var Nav = require('../models/nav');
 
 router.get('/', function (req, res, next) {
-  res.render('index.njk', {
+  res.render('index', {
     nav: new Nav('Home')
   });
 });

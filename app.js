@@ -5,15 +5,15 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var lessMiddleware = require('less-middleware');
-var hbs = require('hbs');
-var nunjucks = require('nunjucks');
+var cons = require('consolidate')
 
 var app = express();
-nunjucks.configure('views', {
-  autoescape: true,
-  express: app,
-  watch: true
-});
+// assign the swig engine to .html files
+app.engine('njk', cons.nunjucks);
+ 
+// set .html as the default extension
+app.set('view engine', 'njk');
+app.set('views', __dirname + '/views');
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
@@ -33,7 +33,6 @@ app.use('/auth', auth);
 app.use('/javascripts', express.static(__dirname + '/node_modules/jquery/dist')); // Redirect jQuery
 app.use('/javascripts', express.static(__dirname + '/node_modules/popper.js/dist')); // Redirect Popper.js
 app.use('/javascripts', express.static(__dirname + '/node_modules/bootstrap/dist/js')); // Redirect Bootstrap JavaScript
-
 app.use('/stylesheets', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/css'))); // Redirect Bootstrap CSS
 
 // catch 404 and forward to error handler
