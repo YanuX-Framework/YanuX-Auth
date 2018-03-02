@@ -6,14 +6,14 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var lessMiddleware = require('less-middleware');
 var hbs = require('hbs');
+var nunjucks = require('nunjucks');
 
 var app = express();
-
-// view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'hbs');
-//Documentations: https://github.com/pillarjs/hbs
-hbs.registerPartials(__dirname + '/views/partials');
+nunjucks.configure('views', {
+  autoescape: true,
+  express: app,
+  watch: true
+});
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
@@ -51,7 +51,7 @@ app.use(function(err, req, res, next) {
 
   // render the error page
   res.status(err.status || 500);
-  res.render('error');
+  res.render('error.njk');
 });
 
 module.exports = app;
