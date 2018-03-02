@@ -7,9 +7,6 @@ var bodyParser = require('body-parser');
 var lessMiddleware = require('less-middleware');
 var hbs = require('hbs');
 
-var index = require('./routes/index');
-var users = require('./routes/users');
-
 var app = express();
 
 // view engine setup
@@ -27,8 +24,11 @@ app.use(cookieParser());
 app.use(lessMiddleware(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'public')));
 
+var index = require('./routes/index');
+var auth = require('./routes/auth');
+
 app.use('/', index);
-app.use('/users', users);
+app.use('/auth', auth);
 
 app.use('/javascripts', express.static(__dirname + '/node_modules/jquery/dist')); // Redirect jQuery
 app.use('/javascripts', express.static(__dirname + '/node_modules/popper.js/dist')); // Redirect Popper.js

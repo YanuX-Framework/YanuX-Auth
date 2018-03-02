@@ -1,9 +1,11 @@
 var express = require('express');
 var router = express.Router();
+var Nav = require('../models/nav');
 
-/* GET home page. */
-router.get('/', function(req, res, next) {
-  res.render('index', { title: 'YanuX' });
+router.get('/', function (req, res, next) {
+  res.render('index', {
+    nav: new Nav('Home')
+  });
 });
 
 module.exports = router;
