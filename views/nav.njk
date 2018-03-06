@@ -8,16 +8,25 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav mr-auto">
                 <li class="nav-item">
-                    <a class="nav-link {{ 'active' if nav.title === 'Home' }}" href="/">Home</a>
+                    <a class="nav-link {{ 'active' if title === 'Home' }}" href="/">Home</a>
                 </li>
             </ul>
             <ul class="navbar-nav ml-auto">
-                <li class="nav-item">
-                    <a class="nav-link {{ 'active' if nav.title === 'Login' }}" href="/auth/login">Login</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link {{ 'active' if nav.title === 'Register' }}" href="/auth/register">Register</a>
-                </li>
+                {% if user is not defined %}
+                    <li class="nav-item">
+                        <a class="nav-link {{ 'active' if title === 'Login' }}" href="/auth/login">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ 'active' if title === 'Register' }}" href="/auth/register">Register</a>
+                    </li>
+                {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">{{ user.username }}</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/auth/logout">{{ user.username }}</a>
+                    </li>
+                {% endif %}
             </ul>
     </nav>
 {% endblock %}
