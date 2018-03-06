@@ -7,7 +7,8 @@ var router = express.Router();
 
 router.get('/login', function (req, res, next) {
     res.render('auth/login', {
-        title: 'Login'
+        title: 'Login',
+        user: req.user
     });
 });
 
@@ -19,16 +20,20 @@ router.post('/login', function (req, res, next) {
 
 router.get('/register', function (req, res, next) {
     res.render('auth/register', {
-        title: 'Register'
+        title: 'Register',
+        user: req.user
     });
 });
 
 router.post('/register', function (req, res, next) {
-    console.log('Register Email: '+req.body.email+" Password: "+req.body.password);
+    console.log('Register Email: ' + req.body.email + " Password: " + req.body.password);
     User.register(new User({ email: req.body.email }), req.body.password, function (err, user) {
         if (err) {
-            console.debug("Passport <ERROR>: "+err);
-            return res.render('auth/register', { title: 'Register', user: user });
+            console.debug("Passport <ERROR>: " + err);
+            return res.render('auth/register', {
+                title: 'Register',
+                user: user
+            });
         }
         passport.authenticate('local')(req, res, function () {
             res.redirect('/');
