@@ -2,6 +2,15 @@
 {% block body %}
     <div class="form-auth-login">
         <h1>Login</h1>
+        {% if error.length > 0 %}
+            <div class="alert alert-danger" role="alert">
+                <ul>
+                    {% for message in error %}
+                        <li>{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
         <form method="POST" action="/auth/login">
             <div class="form-group">
                 <label for="email">Email address</label>

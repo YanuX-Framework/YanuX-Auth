@@ -1,49 +1,13 @@
 var express = require('express');
-var mongoose = require("mongoose");
-var passport = require("passport");
-var User = require("../models/User");
-
 var router = express.Router();
+var userController = require('../controllers/userController')
 
-router.get('/login', function (req, res, next) {
-    res.render('auth/login', {
-        title: 'Login',
-        user: req.user
-    });
-});
+router.get('/login', userController.login_form);
+router.post('/login', userController.login);
 
-router.post('/login', function (req, res, next) {
-    passport.authenticate('local')(req, res, function () {
-        res.redirect('/');
-    });
-});
+router.get('/register', userController.register_form);
+router.post('/register', userController.register);
 
-router.get('/register', function (req, res, next) {
-    res.render('auth/register', {
-        title: 'Register',
-        user: req.user
-    });
-});
-
-router.post('/register', function (req, res, next) {
-    console.log('Register Email: ' + req.body.email + " Password: " + req.body.password);
-    User.register(new User({ email: req.body.email }), req.body.password, function (err, user) {
-        if (err) {
-            console.debug("Passport <ERROR>: " + err);
-            return res.render('auth/register', {
-                title: 'Register',
-                user: user
-            });
-        }
-        passport.authenticate('local')(req, res, function () {
-            res.redirect('/');
-        });
-    });
-});
-
-router.get('/logout', function (req, res, next) {
-    req.logout();
-    res.redirect('/');
-});
+router.get('/logout', userController.logout);
 
 module.exports = router;

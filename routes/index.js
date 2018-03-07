@@ -1,11 +1,7 @@
 var express = require('express');
 var router = express.Router();
+var appController = require('../controllers/appController');
 
-router.get('/', function (req, res, next) {
-  res.render('index', {
-    title: 'Home',
-    user: req.user
-  });
-});
+router.get('/', appController.index);
 
 module.exports = router;
