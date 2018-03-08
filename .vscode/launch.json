@@ -7,8 +7,8 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "Launch Program",
-            "program": "${workspaceFolder}\\bin\\www"
+            "name": "Launch YanuX Auth",
+            "program": "${workspaceFolder}/bin/www"
         }
     ]
 }

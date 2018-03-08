@@ -1,6 +1,8 @@
 var User = require('../models/user');
 var mongoose = require('mongoose');
 var passport = require('passport');
+var { check, validationResult } = require('express-validator/check');
+var { matchedData, sanitize } = require('express-validator/filter');
 
 exports.login_form = function (req, res, next) {
     res.render('auth/login', {
@@ -27,31 +29,35 @@ exports.register_form = function (req, res, next) {
     });
 };
 
+// TODO: I should probably also impose these restrictions at the model level.
+exports.register_validation = [
+    check('email', 'You have not inserted a valid e-mail address.').isEmail(),
+    check('password', 'Your password is too short.').isLength({ min: 8 }),
+    check('confirm_password', 'You have not confirmed your password correctly.').exists()
+        .custom((value, { req }) => value === req.body.password)
+];
 exports.register = function (req, res, next) {
-    var registration_error = false;
-
-    if (req.body.password !== req.body.confirm_password) {
-        req.flash('error', 'The password confirmation does not match the password.');
-        registration_error = true;
+    const errors = validationResult(req);
+    for (const error of errors.array()) {
+        req.flash('error', error.msg);
     }
-    if (registration_error) {
+    if (errors.isEmpty()) {
+        User.register(new User({ email: req.body.email }),
+            req.body.password,
+            function (err, user) {
+                if (err) {
+                    req.flash('error', err.message);
+                    res.redirect('/auth/register');
+                } else {
+                    passport.authenticate('local')(req, res, function () {
+                        res.redirect('/');
+                    });
+                }
+            }
+        );
+    } else {
         res.redirect('/auth/register');
     }
-    User.register(new User({ email: req.body.email }),
-        req.body.password,
-        function (err, user) {
-            if (err) {
-                req.flash('error', err.message);
-                registration_error = true;
-            }
-            if (registration_error) {
-                res.redirect('/auth/register');
-            }
-            passport.authenticate('local')(req, res, function () {
-                res.redirect('/');
-            });
-        }
-    );
 };
 
 exports.logout = function (req, res, next) {

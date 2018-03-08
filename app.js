@@ -12,11 +12,6 @@ var favicon = require('serve-favicon');
 var lessMiddleware = require('less-middleware');
 
 var app = express();
-var User = require('./models/user');
-// Defining a string that will be used to encode and decode cookies.
-// TODO: I should probably store the session secret somewhere safe and only load it into memory when needed.
-var cookieSecret = 'efX4U4RtG1D0by7vWls6l5mYfAfpY4KKkGrWqIs1';
-
 // Setting up the logger.
 app.use(logger('dev'));
 
@@ -29,6 +24,10 @@ app.set('views', __dirname + '/views');
 // Setting up the body and cookie parser.
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+
+// Defining a string that will be used to encode and decode cookies.
+// TODO: I should probably store the session secret somewhere safe and only load it into memory when needed.
+var cookieSecret = 'efX4U4RtG1D0by7vWls6l5mYfAfpY4KKkGrWqIs1';
 app.use(cookieParser(cookieSecret));
 app.use(flash());
 
@@ -48,6 +47,7 @@ mongoose.connect('mongodb://localhost/yanux-auth')
 // Setting up user authentication
 app.use(passport.initialize());
 app.use(passport.session());
+var User = require('./models/user');
 passport.use(User.createStrategy());
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
