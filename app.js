@@ -5,11 +5,11 @@ var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
 var session = require('express-session');
 var flash = require('connect-flash');
-var mongoose = require('mongoose');
-var passport = require('passport');
 var path = require('path');
 var favicon = require('serve-favicon');
 var lessMiddleware = require('less-middleware');
+var mongoose = require('mongoose');
+var passport = require('passport');
 
 var app = express();
 // Setting up the logger.
@@ -38,20 +38,6 @@ app.use(session({
   saveUninitialized: true
 }));
 
-// Setting up the database connection.
-mongoose.Promise = global.Promise;
-mongoose.connect('mongodb://localhost/yanux-auth')
-  .then(() => console.debug('MongoDB [SUCCESS]: Connection Succesful'))
-  .catch((error) => console.error('MongoDB [ERROR]: ' + error));
-
-// Setting up user authentication
-app.use(passport.initialize());
-app.use(passport.session());
-var User = require('./models/user');
-passport.use(User.createStrategy());
-passport.serializeUser(User.serializeUser());
-passport.deserializeUser(User.deserializeUser());
-
 // Setting up automaticc LESS compilation to plain CSS
 app.use(lessMiddleware(path.join(__dirname, 'public')));
 // Setting up the favicon.
@@ -65,6 +51,58 @@ app.use('/javascripts', express.static(__dirname + '/node_modules/bootstrap/dist
 app.use('/stylesheets', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/css'))); // Redirect Bootstrap CSS
 // Setting direct access access to the public folder.
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Setting up the database connection.
+mongoose.Promise = global.Promise;
+mongoose.connect('mongodb://localhost/yanux-auth')
+  .then(() => console.debug('MongoDB [SUCCESS]: Connection Succesful'))
+  .catch((error) => console.error('MongoDB [ERROR]: ' + error));
+
+// Setting up user authentication
+app.use(passport.initialize());
+app.use(passport.session());
+
+var User = require('./models/user');
+passport.use(User.createStrategy());
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
+
+// Setting up Token-based Remember Me Authentication
+var RememberMeToken = require('./models/remembermetoken');
+var RememberMeStrategy = require('passport-remember-me').Strategy;
+passport.use(new RememberMeStrategy(
+  function (rmcookie, done) {
+    // TODO: Maybe I should use Mongoose's populate to make it more seamless:
+    // http://mongoosejs.com/docs/populate.html
+    RememberMeToken.findOneAndRemove({ token: rmcookie }, function (e1, rmtoken) {
+      if (e1) {
+        return done(e1);
+      }
+      if (!rmtoken.userId) {
+        return done(null, false);
+      }
+      User.findOne({ email: rmtoken.userId }, function (e2, user) {
+        if (e2) {
+          return done(e2);
+        }
+        if (!user) {
+          return done(null, false);
+        }
+        return done(null, user)
+      });
+    });
+  },
+  function (user, done) {
+    let rmtoken = new RememberMeToken({ userId: user.email })
+    rmtoken.save(function (err) {
+      if (err) {
+        return done(err);
+      }
+      return done(null, rmtoken.token);
+    })
+  }
+));
+app.use(passport.authenticate('remember-me'));
 
 // Setting up routes
 var index = require('./routes/index');

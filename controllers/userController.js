@@ -1,4 +1,11 @@
+//// User Authentication Controller ////
+// Most of the heavy lifting is done behind the scenes thanks to 'passport-local-mongoose':
+// https://github.com/saintedlama/passport-local-mongoose
+// To implement the 'Remember Me' feature, it is combine with 'passport-remember-me':
+// https://github.com/jaredhanson/passport-remember-me
+// -----------------------------------------------------------------------------
 var User = require('../models/user');
+var RememberMeToken = require('../models/remembermetoken');
 var mongoose = require('mongoose');
 var passport = require('passport');
 var { check, validationResult } = require('express-validator/check');
@@ -17,7 +24,15 @@ exports.login = function (req, res, next) {
         failureRedirect: '/auth/login',
         failureFlash: true
     })(req, res, function () {
-        res.redirect('/');
+        if (req.body.remember_me) {
+            let rmtoken = new RememberMeToken({ userId: req.user.email })
+            rmtoken.save(function () {
+                res.cookie('remember_me', rmtoken.token, { path: '/', httpOnly: true, maxAge: 604800000 }); // 7 days
+                res.redirect('/');
+            })
+        } else {
+            res.redirect('/');
+        }
     });
 };
 
@@ -42,6 +57,7 @@ exports.register = function (req, res, next) {
         req.flash('error', error.msg);
     }
     if (errors.isEmpty()) {
+        // TODO: I should probably also implement send an e-mail to the user so that she HAS to validate the account before using it.
         User.register(new User({ email: req.body.email }),
             req.body.password,
             function (err, user) {
@@ -61,6 +77,7 @@ exports.register = function (req, res, next) {
 };
 
 exports.logout = function (req, res, next) {
+    res.clearCookie('remember_me');
     req.logout();
     res.redirect('/');
 };
