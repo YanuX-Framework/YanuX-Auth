@@ -69,6 +69,8 @@ passport.deserializeUser(User.deserializeUser());
 
 // Setting up Token-based Remember Me Authentication
 var RememberMeToken = require('./models/remembermetoken');
+// TODO: I should probably use passport-remember-me-extended because it supports signed cookies (better security):
+// https://www.npmjs.com/package/passport-remember-me-extended
 var RememberMeStrategy = require('passport-remember-me').Strategy;
 passport.use(new RememberMeStrategy(
   function (rmcookie, done) {
