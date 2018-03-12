@@ -5,6 +5,6 @@ const appController = require('../controllers/appcontroller');
 
 router.get('/', appController.index);
 
-router.get('/email_test', appController.email_test);
+router.get('/emailtest', appController.emailtest);
 
 module.exports = router;

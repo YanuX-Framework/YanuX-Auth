@@ -6,15 +6,16 @@ exports.index = function (req, res, next) {
     });
 };
 
-exports.email_test = function (req, res, next) {
+exports.emailtest = function (req, res, next) {
     req.app.locals.email.send({
-        template: 'passwordreset',
+        template: 'generic',
         message: {
             to: 'petersaints@gmail.com'
         },
         locals: {
-            content: 'New Random Password'
+            subject: 'Email Test',
+            body: 'Email Test'
         }
     }).then(console.log).catch(console.error);
-    res.send('Email Test Sent');
+    res.send('Email Test');
 };

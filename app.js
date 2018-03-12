@@ -101,11 +101,12 @@ app.use(function (err, req, res, next) {
 
 app.locals.email = new EmailTemplate({
   views: {
+    root: path.join(__dirname, 'emails'),
     options: {
       extension: 'njk',
       map: {
         'njk': 'nunjucks'
-      }
+      },
     }
   },
   message: {
