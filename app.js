@@ -12,6 +12,8 @@ const lessMiddleware = require('less-middleware');
 const mongoose = require('mongoose');
 const passport = require('passport');
 const rememberMeStrategy = require('./utils/remembermestrategy');
+const nodemailer = require('nodemailer');
+const EmailTemplate = require('email-templates');
 
 // TODO: I should probably store the session/secret somewhere safe and only load it into memory when needed.
 const secret = 'efX4U4RtG1D0by7vWls6l5mYfAfpY4KKkGrWqIs1';
@@ -95,6 +97,29 @@ app.use(function (err, req, res, next) {
   // render the error page
   res.status(err.status || 500);
   res.render('error.njk');
+});
+
+app.locals.email = new EmailTemplate({
+  views: {
+    options: {
+      extension: 'njk',
+      map: {
+        'njk': 'nunjucks'
+      }
+    }
+  },
+  message: {
+    from: 'm5563id2xqb67hyl@ethereal.email'
+  },
+  send: true,
+  transport: nodemailer.createTransport({
+    host: 'smtp.ethereal.email',
+    port: 587,
+    auth: {
+      user: 'm5563id2xqb67hyl@ethereal.email',
+      pass: 'WUvwvsEg9Q3cER5pMT'
+    }
+  })
 });
 
 module.exports = app;
