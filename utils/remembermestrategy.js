@@ -1,12 +1,13 @@
+'use strict';
 // TODO: I should probably use passport-remember-me-extended because it supports signed cookies (better security):
 // https://www.npmjs.com/package/passport-remember-me-extended
-var RememberMeStrategy = require('passport-remember-me').Strategy;
-var RememberMeToken = require('../models/remembermetoken');
-var crypto = require('crypto');
+const RememberMeStrategy = require('passport-remember-me').Strategy;
+const RememberMeToken = require('../models/remembermetoken');
+const crypto = require('crypto');
 
-var maxAge = 604800000 // 7 days
+const maxAge = 604800000 // 7 days
 
-var rms = new RememberMeStrategy(
+const rmstrategy = new RememberMeStrategy(
     { path: '/', httpOnly: true, maxAge: maxAge },
     function (rmcookie, done) {
         RememberMeToken.findOneAndRemove({
@@ -38,6 +39,7 @@ var rms = new RememberMeStrategy(
         })
     }
 );
-rms.cookieOptions = rms._opts;
 
-module.exports = rms;
+rmstrategy.cookieOptions = rmstrategy._opts;
+
+module.exports = rmstrategy;

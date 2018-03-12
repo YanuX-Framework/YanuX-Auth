@@ -1,3 +1,4 @@
+'use strict';
 //// User Authentication Controller ////
 // Most of the heavy lifting is done behind the scenes thanks to 'passport-local-mongoose':
 // https://github.com/saintedlama/passport-local-mongoose
@@ -10,7 +11,8 @@ var RememberMeStrategy = require('../utils/remembermestrategy');
 var mongoose = require('mongoose');
 var passport = require('passport');
 var { check, validationResult } = require('express-validator/check');
-var { matchedData, sanitize } = require('express-validator/filter');
+// TODO: Perhaps remove this require since it's not currently needed!
+// var { matchedData, sanitize } = require('express-validator/filter');
 
 exports.login_form = function (req, res, next) {
     res.render('auth/login', {

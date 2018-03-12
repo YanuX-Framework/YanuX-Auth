@@ -1,6 +1,7 @@
-var express = require('express');
-var router = express.Router();
-var appController = require('../controllers/appController');
+'use strict';
+const express = require('express');
+const router = express.Router();
+const appController = require('../controllers/appcontroller');
 
 router.get('/', appController.index);
 

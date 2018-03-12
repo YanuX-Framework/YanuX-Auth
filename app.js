@@ -1,17 +1,22 @@
-var express = require('express');
-var logger = require('morgan');
-var cons = require('consolidate');
-var bodyParser = require('body-parser');
-var cookieParser = require('cookie-parser');
-var session = require('express-session');
-var flash = require('connect-flash');
-var path = require('path');
-var favicon = require('serve-favicon');
-var lessMiddleware = require('less-middleware');
-var mongoose = require('mongoose');
-var passport = require('passport');
+'use strict';
+const express = require('express');
+const logger = require('morgan');
+const cons = require('consolidate');
+const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
+const session = require('express-session');
+const flash = require('connect-flash');
+const path = require('path');
+const favicon = require('serve-favicon');
+const lessMiddleware = require('less-middleware');
+const mongoose = require('mongoose');
+const passport = require('passport');
+const rememberMeStrategy = require('./utils/remembermestrategy');
 
-var app = express();
+// TODO: I should probably store the session/secret somewhere safe and only load it into memory when needed.
+const secret = 'efX4U4RtG1D0by7vWls6l5mYfAfpY4KKkGrWqIs1';
+const app = express();
+
 // Setting up the logger.
 app.use(logger('dev'));
 
@@ -26,13 +31,11 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 // Defining a string that will be used to encode and decode cookies.
-// TODO: I should probably store the session secret somewhere safe and only load it into memory when needed.
-var cookieSecret = 'efX4U4RtG1D0by7vWls6l5mYfAfpY4KKkGrWqIs1';
-app.use(cookieParser(cookieSecret));
+app.use(cookieParser(secret));
 app.use(flash());
 // Setting up the session 
 app.use(session({
-  secret: cookieSecret,
+  secret: secret,
   resave: true,
   saveUninitialized: true
 }));
@@ -61,26 +64,25 @@ mongoose.connect('mongodb://localhost/yanux-auth')
 app.use(passport.initialize());
 app.use(passport.session());
 
-var User = require('./models/user');
+const User = require('./models/user');
 passport.use(User.createStrategy());
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
 // Setting up Token-based Remember Me Authentication
-var RememberMeStrategy = require('./utils/remembermestrategy');
-passport.use(RememberMeStrategy);
+passport.use(rememberMeStrategy);
 app.use(passport.authenticate('remember-me'));
 
 // Setting up routes
-var index = require('./routes/index');
-var auth = require('./routes/auth');
+const index = require('./routes/index');
+const auth = require('./routes/auth');
 app.use('/', index);
 app.use('/auth', auth);
 
 //Setting up error handling
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
-  var err = new Error('Not Found');
+  let err = new Error('Not Found');
   err.status = 404;
   next(err);
 });
