@@ -30,7 +30,6 @@ app.use(bodyParser.json());
 var cookieSecret = 'efX4U4RtG1D0by7vWls6l5mYfAfpY4KKkGrWqIs1';
 app.use(cookieParser(cookieSecret));
 app.use(flash());
-
 // Setting up the session 
 app.use(session({
   secret: cookieSecret,

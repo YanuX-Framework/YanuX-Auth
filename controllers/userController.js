@@ -6,6 +6,7 @@
 // -----------------------------------------------------------------------------
 var User = require('../models/user');
 var RememberMeToken = require('../models/remembermetoken');
+var RememberMeStrategy = require('../utils/remembermestrategy');
 var mongoose = require('mongoose');
 var passport = require('passport');
 var { check, validationResult } = require('express-validator/check');
@@ -31,7 +32,7 @@ exports.login = function (req, res, next) {
                     if(err) {
                         console.error('RememberMeToken: '+err);
                     }
-                    res.cookie('remember_me', plainToken, { path: '/', httpOnly: true, maxAge: 604800000 }); // 7 days
+                    res.cookie('remember_me', plainToken, RememberMeStrategy.cookieOptions);
                     res.redirect('/');
                 })
             })

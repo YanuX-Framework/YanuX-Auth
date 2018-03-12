@@ -4,14 +4,16 @@ var RememberMeStrategy = require('passport-remember-me').Strategy;
 var RememberMeToken = require('../models/remembermetoken');
 var crypto = require('crypto');
 
-module.exports = new RememberMeStrategy(
-    { path: '/', httpOnly: true, maxAge: 604800000 },
+var maxAge = 604800000 // 7 days
+
+var rms = new RememberMeStrategy(
+    { path: '/', httpOnly: true, maxAge: maxAge },
     function (rmcookie, done) {
         RememberMeToken.findOneAndRemove({
             token: crypto.createHash('sha256')
                 .update(rmcookie)
                 .digest('hex'),
-            timestamp: { $gt: new Date(new Date().getTime() - 604800000) }
+            timestamp: { $gt: new Date(new Date().getTime() - maxAge) }
         })
             .populate('user')
             .exec(function (err, rmtoken) {
@@ -36,3 +38,6 @@ module.exports = new RememberMeStrategy(
         })
     }
 );
+rms.cookieOptions = rms._opts;
+
+module.exports = rms;
