@@ -25,10 +25,15 @@ exports.login = function (req, res, next) {
         failureFlash: true
     })(req, res, function () {
         if (req.body.remember_me) {
-            let rmtoken = new RememberMeToken({ userId: req.user.email })
-            rmtoken.save(function () {
-                res.cookie('remember_me', rmtoken.token, { path: '/', httpOnly: true, maxAge: 604800000 }); // 7 days
-                res.redirect('/');
+            let rmtoken = new RememberMeToken({ user: req.user._id })
+            rmtoken.generateToken(function(plainToken) {
+                rmtoken.save(function (err) {
+                    if(err) {
+                        console.error('RememberMeToken: '+err);
+                    }
+                    res.cookie('remember_me', plainToken, { path: '/', httpOnly: true, maxAge: 604800000 }); // 7 days
+                    res.redirect('/');
+                })
             })
         } else {
             res.redirect('/');

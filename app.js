@@ -68,42 +68,8 @@ passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
 // Setting up Token-based Remember Me Authentication
-var RememberMeToken = require('./models/remembermetoken');
-// TODO: I should probably use passport-remember-me-extended because it supports signed cookies (better security):
-// https://www.npmjs.com/package/passport-remember-me-extended
-var RememberMeStrategy = require('passport-remember-me').Strategy;
-passport.use(new RememberMeStrategy(
-  function (rmcookie, done) {
-    // TODO: Maybe I should use Mongoose's populate to make it more seamless:
-    // http://mongoosejs.com/docs/populate.html
-    RememberMeToken.findOneAndRemove({ token: rmcookie }, function (e1, rmtoken) {
-      if (e1) {
-        return done(e1);
-      }
-      if (!rmtoken.userId) {
-        return done(null, false);
-      }
-      User.findOne({ email: rmtoken.userId }, function (e2, user) {
-        if (e2) {
-          return done(e2);
-        }
-        if (!user) {
-          return done(null, false);
-        }
-        return done(null, user)
-      });
-    });
-  },
-  function (user, done) {
-    let rmtoken = new RememberMeToken({ userId: user.email })
-    rmtoken.save(function (err) {
-      if (err) {
-        return done(err);
-      }
-      return done(null, rmtoken.token);
-    })
-  }
-));
+var RememberMeStrategy = require('./utils/remembermestrategy');
+passport.use(RememberMeStrategy);
 app.use(passport.authenticate('remember-me'));
 
 // Setting up routes
