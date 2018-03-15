@@ -14,13 +14,16 @@ RememberMeTokenSchema.methods.generateToken = function generateToken(callback) {
     let self = this;
     let plainToken = crypto.randomBytes(32).toString('hex');
     let hashedToken = crypto.createHash('sha256').update(plainToken).digest('hex');
-    this.model('RememberMeToken').count({ token: hashedToken }, function (count) {
-        if (count > 0) {
-            this.generateToken(callback);
-        } else {
-            self.token = hashedToken;
-            callback(plainToken);
-        }
+
+    return new Promise(function (resolve, reject) {
+        self.model('RememberMeToken').count({ token: hashedToken }).then((count) => {
+            if (count > 0) {
+                this.generateToken();
+            } else {
+                self.token = hashedToken;
+                resolve(plainToken);
+            }
+        }).catch((err) => reject(err));
     });
 };
 

@@ -10,10 +10,12 @@
   </head>
   <body>
     {% include "nav.njk" %}
-    <div class="container-fluid">
-        {% block body %}
-        {% endblock %}
-    </div>
+    <main>
+      <div class="container-fluid">
+          {% block body %}
+          {% endblock %}
+      </div>
+    </main>
     <script src="/javascripts/jquery.min.js"></script>
     <script src="/javascripts/bootstrap.bundle.min.js"></script>
   </body>

@@ -1,4 +1,15 @@
 'use strict';
+//TODO: Add internationalization support. I'll probably use i18next + moment.js: 
+// https://www.i18next.com/
+// https://github.com/i18next/i18next-express-middleware
+// https://www.npmjs.com/package/moment
+// But Globalize also seems to be pretty decent and more complete (with number, date and currency formatting):
+// https://github.com/globalizejs/globalize
+// But here are some other options below:
+// https://github.com/airbnb/polyglot.js
+// https://www.npmjs.com/package/i18n-2
+// https://github.com/mashpie/i18n-node
+
 const express = require('express');
 const logger = require('morgan');
 const cons = require('consolidate');
