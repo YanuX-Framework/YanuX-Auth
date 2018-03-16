@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>{{ subject }}</title>
+  </head>
+  <body>
+    {% block body %}
+    <h1>{{ subject }}</h1>
+    You have requested a password reset. Click this <a href="{{ reset_password_url }}">link</a> or copy the following URL to open a page where you can set a new password:
+    <a href="{{ reset_password_url }}">{{ reset_password_url }}</a>
+    {% endblock %}
+  </body>
+</html>

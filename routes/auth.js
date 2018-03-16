@@ -1,6 +1,7 @@
 'use strict';
 const express = require('express');
 const router = express.Router();
+const authUtils = require('../utils/auth');
 const userController = require('../controllers/usercontroller')
 
 router.get('/login',
@@ -17,11 +18,20 @@ router.post('/register',
     userController.register);
 
 router.get('/change_password',
+    authUtils.ensureAuthenticated,
     userController.change_password_form);
 
 router.post('/change_password',
+    authUtils.ensureAuthenticated,
     userController.change_password_validation,
     userController.change_password);
+
+router.get('/reset_password',
+    userController.reset_password_form);
+
+router.post('/reset_password',
+    userController.reset_password_validation,
+    userController.reset_password);
 
 router.get('/logout',
     userController.logout);

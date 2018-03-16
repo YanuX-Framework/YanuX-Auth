@@ -1,6 +1,6 @@
 'use strict';
 const mongoose = require('mongoose');
-const crypto = require("crypto");
+const crypto = require('crypto');
 
 //Define a schema
 const Schema = mongoose.Schema;
@@ -10,7 +10,7 @@ var RememberMeTokenSchema = new Schema({
     timestamp: { type: Date, required: true, default: new Date() }
 });
 
-RememberMeTokenSchema.methods.generateToken = function generateToken(callback) {
+RememberMeTokenSchema.methods.generateToken = function() {
     let self = this;
     let plainToken = crypto.randomBytes(32).toString('hex');
     let hashedToken = crypto.createHash('sha256').update(plainToken).digest('hex');

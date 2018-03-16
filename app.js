@@ -1,5 +1,6 @@
 'use strict';
-//TODO: Add internationalization support. I'll probably use i18next + moment.js: 
+
+// TODO: Add internationalization support. I'll probably use i18next + moment.js: 
 // https://www.i18next.com/
 // https://github.com/i18next/i18next-express-middleware
 // https://www.npmjs.com/package/moment
@@ -9,6 +10,14 @@
 // https://github.com/airbnb/polyglot.js
 // https://www.npmjs.com/package/i18n-2
 // https://github.com/mashpie/i18n-node
+
+// TODO: Add unit testing to my code. These are just some tutorials that I should look at:
+// https://alexanderpaterson.com/posts/how-to-start-unit-testing-your-express-apps
+// https://scotch.io/tutorials/test-a-node-restful-api-with-mocha-and-chai
+// https://glebbahmutov.com/blog/how-to-correctly-unit-test-express-server/
+// These may also be interesting:
+// http://mherman.org/blog/2016/09/12/testing-node-and-express/
+// https://codeburst.io/unit-testing-in-express-with-promise-based-middleware-and-controllers-7d3d59ae61f8
 
 const express = require('express');
 const logger = require('morgan');

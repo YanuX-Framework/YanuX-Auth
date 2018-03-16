@@ -86,7 +86,6 @@ exports.register = function (req, res, next) {
     }
 };
 
-// TODO: Only allow acces to this page if the user is logged in.
 exports.change_password_form = function (req, res, next) {
     res.render('auth/change_password', {
         title: 'Change Password',
@@ -116,6 +115,51 @@ exports.change_password = function (req, res, next) {
             });
     } else {
         res.redirect('/auth/change_password');
+    }
+};
+
+exports.reset_password_validation = [
+    email_check
+];
+
+exports.reset_password_form = function (req, res, next) {
+    res.render('auth/reset_password', {
+        title: 'Reset Password',
+        user: req.user,
+        error: req.flash('error')
+    });
+};
+
+exports.reset_password = function (req, res, next) {
+    const errors = validationResult(req);
+    for (const error of errors.array()) {
+        req.flash('error', error.msg);
+    }
+    if (errors.isEmpty()) {
+        let email = req.body.email;
+        let reset_password_token;
+        User.findOne({ email: email }).then((user) => {
+            reset_password_token = user.generateResetPasswordToken();
+            user.save();
+        }).then((user) => {
+            req.app.locals.email.send({
+                template: 'reset_password',
+                message: {
+                    to: email
+                },
+                locals: {
+                    subject: 'YanuX - Reset Password',
+                    password_reset_url: req.protocol + '://' + req.get('host') + '/auth/new_password/' + email + '/' + reset_password_token
+                }
+            })
+        }).then(() => {
+            res.send('Email sent with a password reset url.')
+        }).catch((err) => {
+            req.flash('error', err.message);
+            res.redirect('/auth/reset_password');
+        });
+    } else {
+        res.redirect('/auth/reset_password');
     }
 };
 

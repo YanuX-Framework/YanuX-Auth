@@ -5,6 +5,7 @@ const appController = require('../controllers/appcontroller');
 
 router.get('/', appController.index);
 
-router.get('/emailtest', appController.emailtest);
+// TODO: Remove this once I'm sure that e-mail sending works well.
+//router.get('/emailtest', appController.emailtest);
 
 module.exports = router;
