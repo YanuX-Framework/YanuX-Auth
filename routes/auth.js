@@ -33,6 +33,13 @@ router.post('/reset_password',
     userController.reset_password_validation,
     userController.reset_password);
 
+router.get('/reset_password/email/:email/token/:token',
+    userController.reset_password_url_form);
+
+router.post('/reset_password/email/:email/token/:token',
+    userController.reset_password_url_validation,
+    userController.reset_password_url);
+
 router.get('/logout',
     userController.logout);
 

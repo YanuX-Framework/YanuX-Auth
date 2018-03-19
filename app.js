@@ -133,6 +133,7 @@ app.locals.email = new EmailTemplate({
     from: 'm5563id2xqb67hyl@ethereal.email'
   },
   send: true,
+  preview: false,
   transport: nodemailer.createTransport({
     host: 'smtp.ethereal.email',
     port: 587,

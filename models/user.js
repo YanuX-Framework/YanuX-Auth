@@ -10,11 +10,13 @@ var UserSchema = new Schema({
     reset_password_token: { type: String }
 });
 
-UserSchema.methods.generateResetPasswordToken = function() {
+UserSchema.statics.hashToken = function (plainToken) {
+    return crypto.createHash('sha256').update(plainToken).digest('hex');
+};
+
+UserSchema.methods.generateResetPasswordToken = function () {
     let plainToken = crypto.randomBytes(32).toString('hex');
-    let hashedToken = crypto.createHash('sha256').update(plainToken).digest('hex');
-    
-    this.reset_password_token = hashedToken;
+    this.reset_password_token = this.constructor.hashToken(plainToken);
     return plainToken;
 };
 

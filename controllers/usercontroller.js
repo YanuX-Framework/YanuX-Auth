@@ -6,16 +6,18 @@
 // To implement the 'Remember Me' feature, it is combine with 'passport-remember-me':
 // https://github.com/jaredhanson/passport-remember-me
 // -----------------------------------------------------------------------------
-var User = require('../models/user');
-var RememberMeToken = require('../models/remembermetoken');
-var RememberMeStrategy = require('../utils/remembermestrategy');
-var mongoose = require('mongoose');
-var passport = require('passport');
-var { check, validationResult } = require('express-validator/check');
+const mongoose = require('mongoose');
+const passport = require('passport');
+const crypto = require('crypto');
+const { check, validationResult } = require('express-validator/check');
 // -----------------------------------------------------------------------------
 // TODO: Perhaps remove this require since it's not currently needed!
 // var { matchedData, sanitize } = require('express-validator/filter');
 // -----------------------------------------------------------------------------
+const User = require('../models/user');
+const RememberMeToken = require('../models/remembermetoken');
+const RememberMeStrategy = require('../utils/remembermestrategy');
+
 exports.login_form = function (req, res, next) {
     res.render('auth/login', {
         title: 'Login',
@@ -137,9 +139,12 @@ exports.reset_password = function (req, res, next) {
     }
     if (errors.isEmpty()) {
         let email = req.body.email;
-        let reset_password_token;
+        let reset_password_url = req.protocol + '://' + req.get('host') + '/auth/reset_password';
         User.findOne({ email: email }).then((user) => {
-            reset_password_token = user.generateResetPasswordToken();
+            if (!user) {
+                throw new Error('The e-mail address you provided is not registered.');
+            }
+            reset_password_url += '/email/' + user.email + '/token/' + user.generateResetPasswordToken();
             user.save();
         }).then((user) => {
             req.app.locals.email.send({
@@ -149,17 +154,81 @@ exports.reset_password = function (req, res, next) {
                 },
                 locals: {
                     subject: 'YanuX - Reset Password',
-                    password_reset_url: req.protocol + '://' + req.get('host') + '/auth/new_password/' + email + '/' + reset_password_token
+                    reset_password_url: reset_password_url
                 }
             })
         }).then(() => {
-            res.send('Email sent with a password reset url.')
+            res.render('message', {
+                title: 'Password Reset Link Sent',
+                message: 'We have sent you message with a link that you can be used to reset your password.',
+                user: req.user,
+                error: req.flash('error')
+            });
         }).catch((err) => {
             req.flash('error', err.message);
             res.redirect('/auth/reset_password');
         });
     } else {
         res.redirect('/auth/reset_password');
+    }
+};
+
+exports.reset_password_url_form = function (req, res, next) {
+    let email = req.params.email;
+    let plainToken = req.params.token;
+    let hashedToken = User.hashToken(plainToken);
+    User.findOne({
+        email: email,
+        reset_password_token: hashedToken
+    }).then((user) => {
+        if (user) {
+            res.render('auth/reset_password_url', {
+                title: 'Reset Password',
+                user: req.user,
+                email: email,
+                token: plainToken,
+                error: req.flash('error')
+            });
+        } else {
+            next(new Error('Invalid password reset token'));
+        } 
+    });
+};
+
+exports.reset_password_url_validation = [
+    password_check,
+    confirm_password_check
+];
+
+exports.reset_password_url = function (req, res, next) {
+    const errors = validationResult(req);
+    for (const error of errors.array()) {
+        req.flash('error', error.msg);
+    }
+    if (errors.isEmpty()) {
+        let email = req.params.email;
+        let plainToken = req.params.token;
+        let hashedToken = User.hashToken(plainToken);
+        User.findOne({
+            email: email,
+            reset_password_token: hashedToken
+        }).then((user) => {
+            if (user) {
+                user.setPassword(req.body.password).then(() => {
+                    user.reset_password_token = null;
+                    user.save();
+                }).then(() => res.render('message', {
+                    title: 'Password Reset',
+                    message: 'You can now login using your new password.',
+                    user: req.user,
+                    error: req.flash('error')
+                }));
+            } else {
+                next(new Error('Invalid password reset token'));
+            }
+        });
+    } else {
+        res.redirect(req.originalUrl);
     }
 };
 
