@@ -4,19 +4,43 @@ const Schema = mongoose.Schema;
 const passportLocalMongoose = require('passport-local-mongoose');
 const crypto = require('crypto');
 
+const maxResetPasswordTokenAge = 86400000 // 1 day
+
 var UserSchema = new Schema({
     email: { type: String, required: true, unique: true },
     password: { type: String },
-    reset_password_token: { type: String }
+    reset_password_token: {
+        token: { type: String },
+        timestamp: { type: Date, required: true, default: new Date() }
+    }
 });
 
 UserSchema.statics.hashToken = function (plainToken) {
     return crypto.createHash('sha256').update(plainToken).digest('hex');
 };
 
+UserSchema.statics.findOneUserByEmailAndValidResetPasswordToken = function (email, token) {
+    return this.findOne({
+        'email': email,
+        'reset_password_token.token': token,
+        'reset_password_token.timestamp': { $gt: new Date(new Date().getTime() - maxResetPasswordTokenAge) }
+    });
+};
+
+UserSchema.methods.clearResetPasswordToken = function () {
+    return this.update({
+        $unset: {
+            reset_password_token: 1
+        }
+    });
+};
+
 UserSchema.methods.generateResetPasswordToken = function () {
     let plainToken = crypto.randomBytes(32).toString('hex');
-    this.reset_password_token = this.constructor.hashToken(plainToken);
+    this.reset_password_token = {
+        token: this.constructor.hashToken(plainToken),
+        timestamp: new Date()
+    };
     return plainToken;
 };
 

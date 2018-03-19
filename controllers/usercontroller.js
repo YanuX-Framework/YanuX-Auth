@@ -177,22 +177,20 @@ exports.reset_password_url_form = function (req, res, next) {
     let email = req.params.email;
     let plainToken = req.params.token;
     let hashedToken = User.hashToken(plainToken);
-    User.findOne({
-        email: email,
-        reset_password_token: hashedToken
-    }).then((user) => {
-        if (user) {
-            res.render('auth/reset_password_url', {
-                title: 'Reset Password',
-                user: req.user,
-                email: email,
-                token: plainToken,
-                error: req.flash('error')
-            });
-        } else {
-            next(new Error('Invalid password reset token'));
-        } 
-    });
+    User.findOneUserByEmailAndValidResetPasswordToken(email, hashedToken)
+        .then((user) => {
+            if (user) {
+                res.render('auth/reset_password_url', {
+                    title: 'Reset Password',
+                    user: req.user,
+                    email: email,
+                    token: plainToken,
+                    error: req.flash('error')
+                });
+            } else {
+                next(new Error('Invalid password reset token'));
+            }
+        });
 };
 
 exports.reset_password_url_validation = [
@@ -209,24 +207,22 @@ exports.reset_password_url = function (req, res, next) {
         let email = req.params.email;
         let plainToken = req.params.token;
         let hashedToken = User.hashToken(plainToken);
-        User.findOne({
-            email: email,
-            reset_password_token: hashedToken
-        }).then((user) => {
-            if (user) {
-                user.setPassword(req.body.password).then(() => {
-                    user.reset_password_token = null;
-                    user.save();
-                }).then(() => res.render('message', {
-                    title: 'Password Reset',
-                    message: 'You can now login using your new password.',
-                    user: req.user,
-                    error: req.flash('error')
-                }));
-            } else {
-                next(new Error('Invalid password reset token'));
-            }
-        });
+        User.findOneUserByEmailAndValidResetPasswordToken(email, hashedToken)
+            .then((user) => {
+                if (user) {
+                    user.setPassword(req.body.password)
+                        .then(() => user.clearResetPasswordToken())
+                        .then(() => user.save())
+                        .then(() => res.render('message', {
+                            title: 'Password Reset',
+                            message: 'You can now login using your new password.',
+                            user: req.user,
+                            error: req.flash('error')
+                        }));
+                } else {
+                    next(new Error('Invalid password reset token'));
+                }
+            });
     } else {
         res.redirect(req.originalUrl);
     }
