@@ -22,10 +22,12 @@
 // TODO: Refacto code so that I have proper log support:
 // http://www.jyotman.xyz/post/logging-in-node.js-done-right
 // https://blog.risingstack.com/node-js-logging-tutorial/
+// http://tostring.it/2014/06/23/advanced-logging-with-nodejs/
 // https://strongloop.com/strongblog/compare-node-js-logging-winston-bunyan/
 
 const express = require('express');
-const logger = require('morgan');
+const morgan = require('morgan');
+const logger = require('./logger');
 const cons = require('consolidate');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
@@ -45,7 +47,9 @@ const secret = 'efX4U4RtG1D0by7vWls6l5mYfAfpY4KKkGrWqIs1';
 const app = express();
 
 // Setting up the logger.
-app.use(logger('dev'));
+app.use(morgan('dev', {
+  stream: logger.stream
+}));
 
 // Setting up nunjucks as the view engine for the express application using consolidate.
 app.engine('njk', cons.nunjucks);
@@ -85,7 +89,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 mongoose.Promise = global.Promise;
 mongoose.connect('mongodb://localhost/yanux-auth')
   .then(() => {
-    console.debug('MongoDB [SUCCESS]: Connection Succesful');
+    logger.debug('MongoDB Connection Succesful');
     // Setting up user authentication
     app.use(passport.initialize());
     app.use(passport.session());
@@ -148,7 +152,7 @@ mongoose.connect('mongodb://localhost/yanux-auth')
       })
     });
   }).catch((error) => {
-    console.error('MongoDB [ERROR]: ' + error);
+    logger.debug('MongoDB Connection Error: '+ error);
     process.exit(1);
   });
 
