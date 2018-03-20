@@ -19,6 +19,11 @@
 // http://mherman.org/blog/2016/09/12/testing-node-and-express/
 // https://codeburst.io/unit-testing-in-express-with-promise-based-middleware-and-controllers-7d3d59ae61f8
 
+// TODO: Refacto code so that I have proper log support:
+// http://www.jyotman.xyz/post/logging-in-node.js-done-right
+// https://blog.risingstack.com/node-js-logging-tutorial/
+// https://strongloop.com/strongblog/compare-node-js-logging-winston-bunyan/
+
 const express = require('express');
 const logger = require('morgan');
 const cons = require('consolidate');
@@ -79,69 +84,72 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Setting up the database connection.
 mongoose.Promise = global.Promise;
 mongoose.connect('mongodb://localhost/yanux-auth')
-  .then(() => console.debug('MongoDB [SUCCESS]: Connection Succesful'))
-  .catch((error) => console.error('MongoDB [ERROR]: ' + error));
+  .then(() => {
+    console.debug('MongoDB [SUCCESS]: Connection Succesful');
+    // Setting up user authentication
+    app.use(passport.initialize());
+    app.use(passport.session());
 
-// Setting up user authentication
-app.use(passport.initialize());
-app.use(passport.session());
+    const User = require('./models/user');
+    passport.use(User.createStrategy());
+    passport.serializeUser(User.serializeUser());
+    passport.deserializeUser(User.deserializeUser());
 
-const User = require('./models/user');
-passport.use(User.createStrategy());
-passport.serializeUser(User.serializeUser());
-passport.deserializeUser(User.deserializeUser());
+    // Setting up Token-based Remember Me Authentication
+    passport.use(rememberMeStrategy);
+    app.use(passport.authenticate('remember-me'));
 
-// Setting up Token-based Remember Me Authentication
-passport.use(rememberMeStrategy);
-app.use(passport.authenticate('remember-me'));
+    // Setting up routes
+    const index = require('./routes/index');
+    const auth = require('./routes/auth');
+    app.use('/', index);
+    app.use('/auth', auth);
 
-// Setting up routes
-const index = require('./routes/index');
-const auth = require('./routes/auth');
-app.use('/', index);
-app.use('/auth', auth);
+    //Setting up error handling
+    // catch 404 and forward to error handler
+    app.use(function (req, res, next) {
+      let err = new Error('Not Found');
+      err.status = 404;
+      next(err);
+    });
 
-//Setting up error handling
-// catch 404 and forward to error handler
-app.use(function (req, res, next) {
-  let err = new Error('Not Found');
-  err.status = 404;
-  next(err);
-});
+    // error handler
+    app.use(function (err, req, res, next) {
+      // set locals, only providing error in development
+      res.locals.message = err.message;
+      res.locals.error = req.app.get('env') === 'development' ? err : {};
+      // render the error page
+      res.status(err.status || 500);
+      res.render('error.njk');
+    });
 
-// error handler
-app.use(function (err, req, res, next) {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
-  // render the error page
-  res.status(err.status || 500);
-  res.render('error.njk');
-});
-
-app.locals.email = new EmailTemplate({
-  views: {
-    root: path.join(__dirname, 'emails'),
-    options: {
-      extension: 'njk',
-      map: {
-        'njk': 'nunjucks'
+    app.locals.email = new EmailTemplate({
+      views: {
+        root: path.join(__dirname, 'emails'),
+        options: {
+          extension: 'njk',
+          map: {
+            'njk': 'nunjucks'
+          },
+        }
       },
-    }
-  },
-  message: {
-    from: 'm5563id2xqb67hyl@ethereal.email'
-  },
-  send: true,
-  preview: false,
-  transport: nodemailer.createTransport({
-    host: 'smtp.ethereal.email',
-    port: 587,
-    auth: {
-      user: 'm5563id2xqb67hyl@ethereal.email',
-      pass: 'WUvwvsEg9Q3cER5pMT'
-    }
-  })
-});
+      message: {
+        from: 'm5563id2xqb67hyl@ethereal.email'
+      },
+      send: true,
+      preview: false,
+      transport: nodemailer.createTransport({
+        host: 'smtp.ethereal.email',
+        port: 587,
+        auth: {
+          user: 'm5563id2xqb67hyl@ethereal.email',
+          pass: 'WUvwvsEg9Q3cER5pMT'
+        }
+      })
+    });
+  }).catch((error) => {
+    console.error('MongoDB [ERROR]: ' + error);
+    process.exit(1);
+  });
 
 module.exports = app;

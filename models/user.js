@@ -11,7 +11,7 @@ var UserSchema = new Schema({
     password: { type: String },
     reset_password_token: {
         token: { type: String },
-        timestamp: { type: Date, required: true, default: new Date() }
+        timestamp: { type: Date, required: true }
     }
 });
 
@@ -19,11 +19,13 @@ UserSchema.statics.hashToken = function (plainToken) {
     return crypto.createHash('sha256').update(plainToken).digest('hex');
 };
 
-UserSchema.statics.findOneUserByEmailAndValidResetPasswordToken = function (email, token) {
+UserSchema.statics.fetchUserByResetPasswordToken = function (email, token) {
+    let now = new Date().getTime();
+    let maxAgeDate = new Date(now - maxResetPasswordTokenAge);
     return this.findOne({
         'email': email,
         'reset_password_token.token': token,
-        'reset_password_token.timestamp': { $gt: new Date(new Date().getTime() - maxResetPasswordTokenAge) }
+        'reset_password_token.timestamp': { $gt: maxAgeDate }
     });
 };
 

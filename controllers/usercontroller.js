@@ -36,7 +36,7 @@ exports.login = function (req, res, next) {
             rmtoken.generateToken().then((plainToken) => rmtoken.save().then(() => {
                 res.cookie('remember_me', plainToken, RememberMeStrategy.cookieOptions);
                 res.redirect('/');
-            }).catch((err) => console.error('RememberMeToken: ' + err)));
+            }));
         } else {
             res.redirect('/');
         }
@@ -70,21 +70,19 @@ exports.register = function (req, res, next) {
     }
     if (errors.isEmpty()) {
         // TODO: I should probably also implement send an e-mail to the user so that she HAS to validate the account before using it.
-        User.register(new User({ email: req.body.email }), req.body.password).then(
-            (user) => {
-                if (err) {
-                    req.flash('error', err.message);
-                    res.redirect('/auth/register');
-                }
-            }
-        ).catch((err) => {
-            passport.authenticate('local')(req, res, function () {
-                res.redirect('/');
+        User.register(new User({ email: req.body.email }), req.body.password,
+            function () {
+                passport.authenticate('local')(req, res, function (err) {
+                    if (err) {
+                        req.flash('error', err.message);
+                        res.redirect(req.originalUrl);
+                    } else {
+                        res.redirect('/');
+                    }
+                })
             });
-        }
-        );
     } else {
-        res.redirect('/auth/register');
+        res.redirect(req.originalUrl);
     }
 };
 
@@ -108,15 +106,14 @@ exports.change_password = function (req, res, next) {
     }
     if (errors.isEmpty()) {
         let user = req.user;
-        user.changePassword(req.body.old_password, req.body.password)
-            .then(() => user.save())
+        user.changePassword(req.body.old_password, req.body.password).then(user.save)
             .then(() => res.redirect('/'))
             .catch((err) => {
                 req.flash('error', err.message);
-                res.redirect('/auth/change_password')
+                res.redirect(req.originalUrl)
             });
     } else {
-        res.redirect('/auth/change_password');
+        res.redirect(req.originalUrl);
     }
 };
 
@@ -143,33 +140,31 @@ exports.reset_password = function (req, res, next) {
         User.findOne({ email: email }).then((user) => {
             if (!user) {
                 throw new Error('The e-mail address you provided is not registered.');
+            } else {
+                reset_password_url += '/email/' + user.email + '/token/' + user.generateResetPasswordToken();
+                user.save();
             }
-            reset_password_url += '/email/' + user.email + '/token/' + user.generateResetPasswordToken();
-            user.save();
-        }).then((user) => {
-            req.app.locals.email.send({
-                template: 'reset_password',
-                message: {
-                    to: email
-                },
-                locals: {
-                    subject: 'YanuX - Reset Password',
-                    reset_password_url: reset_password_url
-                }
-            })
-        }).then(() => {
-            res.render('message', {
-                title: 'Password Reset Link Sent',
-                message: 'We have sent you message with a link that you can be used to reset your password.',
-                user: req.user,
-                error: req.flash('error')
-            });
-        }).catch((err) => {
+        }).then(() => req.app.locals.email.send({
+            template: 'reset_password',
+            message: {
+                to: email
+            },
+            locals: {
+                subject: 'YanuX - Reset Password',
+                reset_password_url: reset_password_url
+            }
+        })).then(() => res.render('message', {
+            title: 'Password Reset Link Sent',
+            message: 'We have sent you message with a link that you can be used to reset your password.',
+            user: req.user,
+            error: req.flash('error')
+        })
+        ).catch((err) => {
             req.flash('error', err.message);
-            res.redirect('/auth/reset_password');
+            res.redirect(req.originalUrl);
         });
     } else {
-        res.redirect('/auth/reset_password');
+        res.redirect(req.originalUrl);
     }
 };
 
@@ -177,7 +172,7 @@ exports.reset_password_url_form = function (req, res, next) {
     let email = req.params.email;
     let plainToken = req.params.token;
     let hashedToken = User.hashToken(plainToken);
-    User.findOneUserByEmailAndValidResetPasswordToken(email, hashedToken)
+    User.fetchUserByResetPasswordToken(email, hashedToken)
         .then((user) => {
             if (user) {
                 res.render('auth/reset_password_url', {
@@ -211,8 +206,8 @@ exports.reset_password_url = function (req, res, next) {
             .then((user) => {
                 if (user) {
                     user.setPassword(req.body.password)
-                        .then(() => user.clearResetPasswordToken())
-                        .then(() => user.save())
+                        .then(user.clearResetPasswordToken)
+                        .then(user.save)
                         .then(() => res.render('message', {
                             title: 'Password Reset',
                             message: 'You can now login using your new password.',
