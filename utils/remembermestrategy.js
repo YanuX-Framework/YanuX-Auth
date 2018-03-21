@@ -1,45 +1,41 @@
 'use strict';
+
 // TODO: I should probably use passport-remember-me-extended because it supports signed cookies (better security):
 // https://www.npmjs.com/package/passport-remember-me-extended
 const RememberMeStrategy = require('passport-remember-me').Strategy;
 const RememberMeToken = require('../models/remembermetoken');
-const crypto = require('crypto');
 
-const maxAge = 604800000 // 7 days
+const maxRememberMeTokenAge = 604800000 // 7 days
 
 const rmstrategy = new RememberMeStrategy(
-    { path: '/', httpOnly: true, maxAge: maxAge },
-    function (rmcookie, done) {
+    { path: '/', httpOnly: true, maxAge: maxRememberMeTokenAge },
+    (rmcookie, done) => {
+        let now = new Date().getTime();
+        let maxAgeDate = new Date(now - maxRememberMeTokenAge);
+        let plainToken = RememberMeToken.hashToken(rmcookie.token);
         RememberMeToken.findOneAndRemove({
-            token: crypto.createHash('sha256')
-                .update(rmcookie)
-                .digest('hex'),
-            timestamp: { $gt: new Date(new Date().getTime() - maxAge) }
-        })
-            .populate('user')
-            .exec(function (err, rmtoken) {
-                if (err) {
-                    return done(err);
-                }
-                if (!rmtoken || !rmtoken.user) {
+            token: plainToken,
+            timestamp: { $gt: maxAgeDate }
+        }).populate('user')
+            .exec()
+            .then(rmtoken => {
+                if (rmtoken && rmtoken.user) {
+                    return done(null, rmtoken.user);
+                } else {
                     return done(null, false);
                 }
-                return done(null, rmtoken.user)
-            });
+            }).catch(err => done(err));
     },
-    function (user, done) {
+    (user, done) => {
         let rmtoken = new RememberMeToken({ user: user._id })
-        rmtoken.generateToken(function (plainToken) {
-            rmtoken.save(function (err) {
-                if (err) {
-                    return done(err);
-                }
-                return done(null, plainToken);
-            })
+        rmtoken.generateToken().then((plainToken) => {
+            let cookie = { email: user.email, token: plainToken }
+            rmtoken.save()
+                .then(() => done(null, cookie))
+                .catch(err => done(err));
         })
     }
 );
 
 rmstrategy.cookieOptions = rmstrategy._opts;
-
 module.exports = rmstrategy;

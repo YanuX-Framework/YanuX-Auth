@@ -1,5 +1,6 @@
-const winston = require("winston");
+'use strict';
 
+const winston = require("winston");
 const level = process.env.LOG_LEVEL || 'debug';
 
 const logger = new winston.Logger({

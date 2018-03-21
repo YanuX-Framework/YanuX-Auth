@@ -19,7 +19,16 @@
 // http://mherman.org/blog/2016/09/12/testing-node-and-express/
 // https://codeburst.io/unit-testing-in-express-with-promise-based-middleware-and-controllers-7d3d59ae61f8
 
-// TODO: Refacto code so that I have proper log support:
+// TODO: Add OAuth 2.0 server support. There are at least 2 main npm packages for that:
+// https://www.npmjs.com/package/oauth2orize
+// https://www.npmjs.com/package/oauth2-server
+// https://www.npmjs.com/package/node-oauth2-server
+// https://npmcompare.com/compare/node-oauth2-server,oauth2-server,oauth2orize
+// https://blog.cloudboost.io/how-to-make-an-oauth-2-server-with-node-js-a6db02dc2ce7
+// https://tech.zilverline.com/2017/03/17/nodejs-oauth2-provider
+// https://oauth.net/code/
+
+// TODO: Refactor code so that I have proper log support:
 // http://www.jyotman.xyz/post/logging-in-node.js-done-right
 // https://blog.risingstack.com/node-js-logging-tutorial/
 // http://tostring.it/2014/06/23/advanced-logging-with-nodejs/

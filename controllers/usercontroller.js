@@ -33,10 +33,13 @@ exports.login = function (req, res, next) {
     })(req, res, function () {
         if (req.body.remember_me) {
             let rmtoken = new RememberMeToken({ user: req.user._id })
-            rmtoken.generateToken().then((plainToken) => rmtoken.save().then(() => {
-                res.cookie('remember_me', plainToken, RememberMeStrategy.cookieOptions);
-                res.redirect('/');
-            }));
+            rmtoken.generateToken().then((plainToken => rmtoken.save()
+                .then(() => {
+                    let cookie = { email: req.user.email, token: plainToken }
+                    res.cookie('remember_me', cookie, RememberMeStrategy.cookieOptions);
+                    res.redirect('/');
+                })
+            ));
         } else {
             res.redirect('/');
         }
@@ -108,7 +111,7 @@ exports.change_password = function (req, res, next) {
         let user = req.user;
         user.changePassword(req.body.old_password, req.body.password).then(user.save)
             .then(() => res.redirect('/'))
-            .catch((err) => {
+            .catch(err => {
                 req.flash('error', err.message);
                 res.redirect(req.originalUrl)
             });
@@ -137,12 +140,12 @@ exports.reset_password = function (req, res, next) {
     if (errors.isEmpty()) {
         let email = req.body.email;
         let reset_password_url = req.protocol + '://' + req.get('host') + '/auth/reset_password';
-        User.findOne({ email: email }).then((user) => {
+        User.findOne({ email: email }).then(user => {
             if (!user) {
                 throw new Error('The e-mail address you provided is not registered.');
             } else {
                 reset_password_url += '/email/' + user.email + '/token/' + user.generateResetPasswordToken();
-                user.save();
+                return user.save();
             }
         }).then(() => req.app.locals.email.send({
             template: 'reset_password',
@@ -159,7 +162,7 @@ exports.reset_password = function (req, res, next) {
             user: req.user,
             error: req.flash('error')
         })
-        ).catch((err) => {
+        ).catch(err => {
             req.flash('error', err.message);
             res.redirect(req.originalUrl);
         });
@@ -173,7 +176,7 @@ exports.reset_password_url_form = function (req, res, next) {
     let plainToken = req.params.token;
     let hashedToken = User.hashToken(plainToken);
     User.fetchUserByResetPasswordToken(email, hashedToken)
-        .then((user) => {
+        .then(user => {
             if (user) {
                 res.render('auth/reset_password_url', {
                     title: 'Reset Password',
@@ -202,8 +205,8 @@ exports.reset_password_url = function (req, res, next) {
         let email = req.params.email;
         let plainToken = req.params.token;
         let hashedToken = User.hashToken(plainToken);
-        User.findOneUserByEmailAndValidResetPasswordToken(email, hashedToken)
-            .then((user) => {
+        User.fetchUserByResetPasswordToken(email, hashedToken)
+            .then(user => {
                 if (user) {
                     user.setPassword(req.body.password)
                         .then(user.clearResetPasswordToken)
@@ -215,7 +218,7 @@ exports.reset_password_url = function (req, res, next) {
                             error: req.flash('error')
                         }));
                 } else {
-                    next(new Error('Invalid password reset token'));
+                    throw new Error('Invalid password reset token');
                 }
             });
     } else {
