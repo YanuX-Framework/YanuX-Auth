@@ -47,6 +47,7 @@ const favicon = require('serve-favicon');
 const lessMiddleware = require('less-middleware');
 const mongoose = require('mongoose');
 const passport = require('passport');
+const httpBasicStrategy = require('./utils/httpbasicstrategy');
 const rememberMeStrategy = require('./utils/remembermestrategy');
 const nodemailer = require('nodemailer');
 const EmailTemplate = require('email-templates');
@@ -108,6 +109,9 @@ mongoose.connect('mongodb://localhost/yanux-auth')
     passport.serializeUser(User.serializeUser());
     passport.deserializeUser(User.deserializeUser());
 
+    // Setting up HTTP Basic Authentication
+    passport.use(httpBasicStrategy);
+
     // Setting up Token-based Remember Me Authentication
     passport.use(rememberMeStrategy);
     app.use(passport.authenticate('remember-me'));
@@ -115,8 +119,10 @@ mongoose.connect('mongodb://localhost/yanux-auth')
     // Setting up routes
     const index = require('./routes/index');
     const auth = require('./routes/auth');
+    const clients = require('./routes/clients');
     app.use('/', index);
     app.use('/auth', auth);
+    app.use('/api', clients);
 
     //Setting up error handling
     // catch 404 and forward to error handler
@@ -161,7 +167,7 @@ mongoose.connect('mongodb://localhost/yanux-auth')
       })
     });
   }).catch((error) => {
-    logger.debug('MongoDB Connection Error: '+ error);
+    logger.debug(error);
     process.exit(1);
   });
 

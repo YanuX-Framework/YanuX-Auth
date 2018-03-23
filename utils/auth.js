@@ -1,10 +1,7 @@
 'use strict';
 
-module.exports.ensureAuthenticated = function ensureAuthenticated(req, res, next) {
-    if (req.isAuthenticated()) {
-        return next();
-    }
-    else {
-        res.redirect('/auth/login')
-    }
-};
+const passport = require('passport');
+const connectEnsureLogin = require('connect-ensure-login');
+
+module.exports.ensureLoggedIn = connectEnsureLogin.ensureLoggedIn('/auth/login')
+module.exports.ensureHttpBasicAuth = passport.authenticate('basic', { session: false });

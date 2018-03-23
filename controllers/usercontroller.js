@@ -37,7 +37,7 @@ exports.login = function (req, res, next) {
                 .then(() => {
                     let cookie = { email: req.user.email, token: plainToken }
                     res.cookie('remember_me', cookie, RememberMeStrategy.cookieOptions);
-                    res.redirect('/');
+                    res.redirect(req.session.returnTo ? req.session.returnTo : '/');
                 })
             ));
         } else {
