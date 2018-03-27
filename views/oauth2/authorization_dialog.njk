@@ -1,0 +1,14 @@
+{% extends "layout.njk" %}
+{% block body %}
+    <h1>Hello {{ user.email }}</h1>
+    <p><b>{{ client.name }}</b> is requesting <b>full access</b> to your account.</p>
+    <p>Do you approve?</p>
+    <form action="/api/oauth2/authorize" method="post">
+        <input name="transaction_id" type="hidden" value="{{ transactionId }}>">
+        <div>
+            <input type="submit" value="Allow" name="allow" id="allow">
+            <input type="submit" value="Deny" name="cancel" id="deny">
+        </div>
+    </form>
+{% endblock %}
+

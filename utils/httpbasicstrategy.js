@@ -1,3 +1,5 @@
+'use strict';
+
 const HttpBasicStrategy = require('passport-http').BasicStrategy;
 const User = require('../models/user');
 
