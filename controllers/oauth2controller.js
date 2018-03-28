@@ -1,26 +1,12 @@
 'use strict';
 
-const oauth2orize = require('oauth2orize')
+const oauth2orize = require('oauth2orize');
+const uid = require('uid2');
 const User = require('../models/user');
 const Client = require('../models/client');
 const AccessToken = require('../models/accesstoken');
 const AuthorizationCode = require('../models/authorizationcode');
-
-function uid(len) {
-    var buf = []
-        , chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
-        , charlen = chars.length;
-
-    for (var i = 0; i < len; ++i) {
-        buf.push(chars[getRandomInt(0, charlen - 1)]);
-    }
-
-    return buf.join('');
-};
-
-function getRandomInt(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-}
+const InvalidAuthorizationCodeError = require('../errors/invalidauthorizationcodeerror');
 
 const oauth2_server = oauth2orize.createServer();
 
@@ -29,66 +15,64 @@ oauth2_server.serializeClient(function (client, callback) {
 });
 
 oauth2_server.deserializeClient(function (id, callback) {
-    Client.findOne({ _id: id })
+    Client.findById(id)
         .then(client => callback(null, client))
         .catch(err => callback(err))
 });
 
-server.grant(oauth2orize.grant.code(function (client, redirectUri, user, ares, callback) {
-    // Create a new authorization code
-    var code = new AuthorizationCode({
+oauth2_server.grant(oauth2orize.grant.code(function (client, redirectUri, user, ares, callback) {
+    new AuthorizationCode({
         client: client._id,
         user: user._id,
         value: uid(16),
         redirectUri: redirectUri
-    });
-
-    code.save(function (err) {
-        if (err) { return callback(err); }
-
-        callback(null, code.value);
-    });
+    }).save()
+        .then(code => callback(null, code.value))
+        .catch(err => callback(err))
 }));
 
 oauth2_server.exchange(oauth2orize.exchange.code(function (client, code, redirectUri, callback) {
-    AuthorizationCode.findOne({ value: code }, function (err, authCode) {
-        if (err) { return callback(err); }
-        if (authCode === undefined) { return callback(null, false); }
-        if (client._id.toString() !== authCode.client._id) { return callback(null, false); }
-        if (redirectUri !== authCode.redirectUri) { return callback(null, false); }
-
-        // Delete auth code now that it has been used
-        authCode.remove(function (err) {
-            if (err) {
-                return callback(err);
+    AuthorizationCode.findOne({ value: code })
+        .then(authorizationCode => {
+            if (authorizationCode
+                && client._id === authorizationCode.client._id
+                && redirectUri === authorizationCode.redirectUri) {
+                return authorizationCode.remove();
+            } else {
+                return Promise.reject(new InvalidAuthorizationCodeError());
             }
-
-            // Create a new access token
-            var token = new AccessToken({
-                value: uid(256),
-                client: authCode.client._id,
-                user: authCode.user._id
-            });
-
-            // Save the access token and check for errors
-            token.save(function (err) {
-                if (err) { return callback(err); }
-                callback(null, token);
-            });
-        });
-    });
+        }).then(authorizationCode => {
+            new AccessToken({
+                client: authorizationCode.client._id,
+                user: authorizationCode.user._id,
+                value: uid(256)
+            }).save()
+        }).then(accessToken => callback(null, accessToken))
+        .catch(err => {
+            if (err instanceof InvalidAuthorizationCodeError) {
+                return callback(null, false)
+            } else {
+                return callback(err)
+            }
+        })
 }));
 
 module.exports.authorization = [
-    oauth2_server.authorization(function (clientId, redirectUri, callback) {
-        Client.findOne({ id: clientId }, function (err, client) {
-            if (err) { return callback(err); }
-
-            return callback(null, client, redirectUri);
+    oauth2_server.authorize(function (clientId, redirectUri, callback) {
+        Client.findOne({ id: clientId })
+            .then(client => {
+                if (client/* && client.redirectUri === redirectUri */) {
+                    return callback(null, client, redirectUri);
+                } else {
+                    return callback(null, false);
+                }
+            }).catch(err => callback(err));
+    }), function (req, res, next) {
+        res.render('oauth2/authorization_dialog', {
+            user: req.user,
+            client: req.oauth2.client,
+            transactionID: req.oauth2.transactionID
         });
-    }),
-    function (req, res) {
-        res.render('dialog', { transactionID: req.oauth2.transactionID, user: req.user, client: req.oauth2.client });
     }
 ]
 

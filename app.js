@@ -97,86 +97,90 @@ app.use('/stylesheets', express.static(path.join(__dirname, 'node_modules/bootst
 // Setting direct access access to the public folder.
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.locals.email = new EmailTemplate({
+  views: {
+    root: path.join(__dirname, 'emails'),
+    options: {
+      extension: 'njk',
+      map: {
+        'njk': 'nunjucks'
+      },
+    }
+  },
+  message: {
+    from: 'm5563id2xqb67hyl@ethereal.email'
+  },
+  send: true,
+  preview: false,
+  transport: nodemailer.createTransport({
+    host: 'smtp.ethereal.email',
+    port: 587,
+    auth: {
+      user: 'm5563id2xqb67hyl@ethereal.email',
+      pass: 'WUvwvsEg9Q3cER5pMT'
+    }
+  })
+});
+
 // Setting up the database connection.
 mongoose.Promise = global.Promise;
 mongoose.connect('mongodb://localhost/yanux-auth')
   .then(() => {
     logger.debug('MongoDB Connection Succesful');
-    // Setting up user authentication
-    app.use(passport.initialize());
-    app.use(passport.session());
-
-    const User = require('./models/user');
-    passport.use(User.createStrategy());
-    passport.serializeUser(User.serializeUser());
-    passport.deserializeUser(User.deserializeUser());
-
-    // Setting up HTTP Basic Authentication
-    passport.use(httpBasicStrategy);
-
-    // Setting up Client's HTTP Basic Authentication
-    passport.use('client-basic', clientHttpBasicStrategy);
-
-    // Setting up HTTP Bearer Authentication
-    passport.use(httpBearerStrategy);
-
-    // Setting up Token-based Remember Me Authentication
-    passport.use(rememberMeStrategy);
-    app.use(passport.authenticate('remember-me'));
-
-    // Setting up routes
-    const index = require('./routes/index');
-    const auth = require('./routes/auth');
-    const clients = require('./routes/clients');
-    app.use('/', index);
-    app.use('/auth', auth);
-    app.use('/api', clients);
-
-    //Setting up error handling
-    // catch 404 and forward to error handler
-    app.use(function (req, res, next) {
-      let err = new Error('Not Found');
-      err.status = 404;
-      next(err);
-    });
-
-    // error handler
-    app.use(function (err, req, res, next) {
-      // set locals, only providing error in development
-      res.locals.message = err.message;
-      res.locals.error = req.app.get('env') === 'development' ? err : {};
-      // render the error page
-      res.status(err.status || 500);
-      res.render('error.njk');
-    });
-
-    app.locals.email = new EmailTemplate({
-      views: {
-        root: path.join(__dirname, 'emails'),
-        options: {
-          extension: 'njk',
-          map: {
-            'njk': 'nunjucks'
-          },
-        }
-      },
-      message: {
-        from: 'm5563id2xqb67hyl@ethereal.email'
-      },
-      send: true,
-      preview: false,
-      transport: nodemailer.createTransport({
-        host: 'smtp.ethereal.email',
-        port: 587,
-        auth: {
-          user: 'm5563id2xqb67hyl@ethereal.email',
-          pass: 'WUvwvsEg9Q3cER5pMT'
-        }
-      })
-    });
   }).catch((error) => {
     logger.debug(error);
-    process.exit(1);
+    //process.exit(1);
   });
+
+// Setting up user authentication
+app.use(passport.initialize());
+app.use(passport.session());
+
+const User = require('./models/user');
+passport.use(User.createStrategy());
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
+
+// Setting up HTTP Basic Authentication
+passport.use(httpBasicStrategy);
+
+// Setting up Client's HTTP Basic Authentication
+passport.use('client-basic', clientHttpBasicStrategy);
+
+// Setting up HTTP Bearer Authentication
+passport.use(httpBearerStrategy);
+
+// Setting up Token-based Remember Me Authentication
+passport.use(rememberMeStrategy);
+app.use(passport.authenticate('remember-me'));
+
+// Setting up routes
+const index = require('./routes/index');
+const auth = require('./routes/auth');
+const oauth2 = require('./routes/oauth2');
+const clients = require('./routes/clients');
+
+app.use('/', index);
+app.use('/auth', auth);
+app.use('/oauth2', oauth2);
+app.use('/api', clients);
+
+//Setting up error handling
+// catch 404 and forward to error handler
+app.use(function (req, res, next) {
+  let err = new Error('Not Found');
+  err.status = 404;
+  next(err);
+});
+
+// error handler
+app.use(function (err, req, res, next) {
+  // set locals, only providing error in development
+  res.locals.message = err.message;
+  res.locals.error = req.app.get('env') === 'development' ? err : {};
+  // render the error page
+  res.status(err.status || 500);
+  res.render('error.njk');
+});
 
 module.exports = app;
