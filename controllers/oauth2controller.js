@@ -34,19 +34,18 @@ oauth2_server.grant(oauth2orize.grant.code(function (client, redirectUri, user, 
 oauth2_server.exchange(oauth2orize.exchange.code(function (client, code, redirectUri, callback) {
     AuthorizationCode.findOne({ value: code })
         .then(authorizationCode => {
-            if (authorizationCode
-                && client._id === authorizationCode.client._id
-                && redirectUri === authorizationCode.redirectUri) {
+            if (authorizationCode && authorizationCode.client.equals(client._id)
+                /* && authorizationCode.redirectUri === redirectUri */) {
                 return authorizationCode.remove();
             } else {
                 return Promise.reject(new InvalidAuthorizationCodeError());
             }
         }).then(authorizationCode => {
-            new AccessToken({
-                client: authorizationCode.client._id,
-                user: authorizationCode.user._id,
+            return new AccessToken({
+                client: authorizationCode.client,
+                user: authorizationCode.user,
                 value: uid(256)
-            }).save()
+            }).save();
         }).then(accessToken => callback(null, accessToken))
         .catch(err => {
             if (err instanceof InvalidAuthorizationCodeError) {

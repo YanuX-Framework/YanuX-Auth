@@ -11,7 +11,7 @@ const UserSchema = new Schema({
     password: { type: String },
     reset_password_token: {
         token: { type: String },
-        timestamp: { type: Date, required: true }
+        timestamp: { type: Date }
     }
 });
 
