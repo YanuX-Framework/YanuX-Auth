@@ -1,8 +1,10 @@
-// Load required packages
+'use strict';
+
+// TODO: Create full RESTful API and/or pages to manage clients.
 var Client = require('../models/client');
 
 // Create endpoint /api/client for POST
-exports.postClients = function (req, res, next) {
+exports.postClient = function (req, res, next) {
     // Create a new instance of the Client model
     var client = new Client();
     // Set the client properties that came from the POST data
@@ -16,10 +18,14 @@ exports.postClients = function (req, res, next) {
         .catch(err => res.send(err));
 };
 
-// Create endpoint /api/clients for GET
-exports.getClients = function (req, res, next) {
+// Create endpoint /api/client for GET
+exports.getClient = function (req, res, next) {
     // Use the Client model to find all clients
     Client.find({ user: req.user })
         .then(clients => res.json(clients))
         .catch(err => res.send(err));
 };
+
+exports.verifyOAuth2 = function (req, res, next) {
+    res.json({ user: req.user });
+}

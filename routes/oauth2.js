@@ -6,11 +6,11 @@ const authUtils = require('../utils/auth');
 const oauth2Controller = require('../controllers/oauth2controller');
 
 router.route('/authorize')
-    .get(authUtils.ensureAuthenticated,
+    .get(authUtils.ensureLoggedIn,
         oauth2Controller.authorization)
 
 router.route('/authorize')
-    .post(authUtils.ensureAuthenticated,
+    .post(authUtils.ensureLoggedIn,
         oauth2Controller.decision);
 
 router.route('/token')

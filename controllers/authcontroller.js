@@ -1,4 +1,5 @@
 'use strict';
+
 //// User Authentication Controller ////
 // -----------------------------------------------------------------------------
 // Most of the heavy lifting is done behind the scenes thanks to 'passport-local-mongoose':
@@ -109,8 +110,9 @@ exports.change_password = function (req, res, next) {
     }
     if (errors.isEmpty()) {
         let user = req.user;
-        user.changePassword(req.body.old_password, req.body.password).then(user.save)
-            .then(() => res.redirect('/'))
+        user.changePassword(req.body.old_password, req.body.password)
+            .then(user => user.save())
+            .then(res.redirect('/'))
             .catch(err => {
                 req.flash('error', err.message);
                 res.redirect(req.originalUrl)
@@ -209,14 +211,17 @@ exports.reset_password_url = function (req, res, next) {
             .then(user => {
                 if (user) {
                     user.setPassword(req.body.password)
-                        .then(user.clearResetPasswordToken)
-                        .then(user.save)
+                        .then(user => user.save())
+                        .then(user => user.clearResetPasswordToken())
                         .then(() => res.render('message', {
                             title: 'Password Reset',
                             message: 'You can now login using your new password.',
                             user: req.user,
                             error: req.flash('error')
-                        }));
+                        })).catch(err => {
+                            req.flash('error', err.message);
+                            res.redirect(req.originalUrl);
+                        });
                 } else {
                     throw new Error('Invalid password reset token');
                 }
@@ -227,7 +232,19 @@ exports.reset_password_url = function (req, res, next) {
 };
 
 exports.logout = function (req, res, next) {
-    res.clearCookie('remember_me');
-    req.logout();
-    res.redirect('/');
+    let rememberMeCookie = req.cookies['remember_me'];
+    let logout = function (req, res) {
+        res.clearCookie('remember_me');
+        req.logout();
+        res.redirect('/');
+    }
+    if (rememberMeCookie) {
+        RememberMeToken.remove({
+            user: req.user,
+            token: RememberMeToken.hashToken(rememberMeCookie.token)
+        }).then(() => logout(req, res));
+    } else {
+        logout(req, res);
+    }
+
 };

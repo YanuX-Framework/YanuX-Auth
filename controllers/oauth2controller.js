@@ -46,8 +46,9 @@ oauth2_server.exchange(oauth2orize.exchange.code(function (client, code, redirec
                 user: authorizationCode.user,
                 value: uid(256)
             }).save();
-        }).then(accessToken => callback(null, accessToken))
-        .catch(err => {
+        }).then(accessToken => {
+            callback(null, accessToken.value, null, { expires_in: 86400 });
+        }).catch(err => {
             if (err instanceof InvalidAuthorizationCodeError) {
                 return callback(null, false)
             } else {

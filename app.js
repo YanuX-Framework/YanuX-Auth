@@ -158,12 +158,12 @@ app.use(passport.authenticate('remember-me'));
 const index = require('./routes/index');
 const auth = require('./routes/auth');
 const oauth2 = require('./routes/oauth2');
-const clients = require('./routes/clients');
+const api = require('./routes/api');
 
 app.use('/', index);
 app.use('/auth', auth);
 app.use('/oauth2', oauth2);
-app.use('/api', clients);
+app.use('/api', api);
 
 //Setting up error handling
 // catch 404 and forward to error handler

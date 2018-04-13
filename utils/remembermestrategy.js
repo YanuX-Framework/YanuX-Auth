@@ -5,17 +5,13 @@
 const RememberMeStrategy = require('passport-remember-me').Strategy;
 const RememberMeToken = require('../models/remembermetoken');
 
-const maxRememberMeTokenAge = 604800000 // 7 days
-
 const rmstrategy = new RememberMeStrategy(
-    { path: '/', httpOnly: true, maxAge: maxRememberMeTokenAge },
+    { path: '/', httpOnly: true, maxAge: RememberMeToken.MAX_REMEMBER_ME_TOKEN_AGE },
     (rmcookie, done) => {
-        let now = new Date().getTime();
-        let maxAgeDate = new Date(now - maxRememberMeTokenAge);
         let plainToken = RememberMeToken.hashToken(rmcookie.token);
         RememberMeToken.findOneAndRemove({
             token: plainToken,
-            timestamp: { $gt: maxAgeDate }
+            expiration_date: { $gt: new Date() }
         }).populate('user')
             .exec()
             .then(rmtoken => {
@@ -27,7 +23,9 @@ const rmstrategy = new RememberMeStrategy(
             }).catch(err => done(err));
     },
     (user, done) => {
-        let rmtoken = new RememberMeToken({ user: user._id })
+        let rmtoken = new RememberMeToken({
+            user: user._id,
+        })
         rmtoken.generateToken().then((plainToken) => {
             let cookie = { email: user.email, token: plainToken }
             rmtoken.save()

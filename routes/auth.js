@@ -3,7 +3,7 @@
 const express = require('express');
 const router = express.Router();
 const authUtils = require('../utils/auth');
-const userController = require('../controllers/usercontroller')
+const userController = require('../controllers/authcontroller')
 
 router.get('/login',
     userController.login_form);
