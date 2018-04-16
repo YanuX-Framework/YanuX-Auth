@@ -21,6 +21,10 @@ oauth2_server.deserializeClient(function (id, callback) {
 });
 
 oauth2_server.grant(oauth2orize.grant.code(function (client, redirectUri, user, ares, callback) {
+    /**
+     * TODO: Decide whether I allow the redirect URI to be defined upon the Authorization Request,
+     * or if I enforce it to be defined at the client registration level.
+     **/
     new AuthorizationCode({
         client: client._id,
         user: user._id,
@@ -34,8 +38,7 @@ oauth2_server.grant(oauth2orize.grant.code(function (client, redirectUri, user, 
 oauth2_server.exchange(oauth2orize.exchange.code(function (client, code, redirectUri, callback) {
     AuthorizationCode.findOne({ value: code })
         .then(authorizationCode => {
-            if (authorizationCode && authorizationCode.client.equals(client._id)
-                /* && authorizationCode.redirectUri === redirectUri */) {
+            if (authorizationCode && authorizationCode.client.equals(client._id)) {
                 return authorizationCode.remove();
             } else {
                 return Promise.reject(new InvalidAuthorizationCodeError());
@@ -57,11 +60,26 @@ oauth2_server.exchange(oauth2orize.exchange.code(function (client, code, redirec
         })
 }));
 
+oauth2_server.exchange(oauth2orize.exchange.refreshToken(function (client, refreshToken, scope, callback) {
+    // TODO: Implement Refresh Token: https://github.com/jaredhanson/oauth2orize/blob/master/lib/exchange/refreshToken.js
+    console.log("Refresh Token Request Received");
+}));
+
+oauth2_server.exchange(oauth2orize.exchange.clientCredentials(function(client, scope, body, authInfo, done) {
+    // TODO: Implement Client Credentials Token: https://github.com/jaredhanson/oauth2orize/blob/master/lib/exchange/clientCredentials.js
+    console.log("Client Credentials Request Received");
+}));
+
+oauth2_server.exchange(oauth2_server.exchange.password(function(client, username, password, scope, body, authInfo, done) {
+    // TODO: Implement Password Token: https://github.com/jaredhanson/oauth2orize/blob/master/lib/exchange/password.js
+    console.log("Password Request Received");
+}));
+
 module.exports.authorization = [
     oauth2_server.authorize(function (clientId, redirectUri, callback) {
         Client.findOne({ id: clientId })
             .then(client => {
-                if (client/* && client.redirectUri === redirectUri */) {
+                if (client && client.redirectUri === redirectUri) {
                     return callback(null, client, redirectUri);
                 } else {
                     return callback(null, false);

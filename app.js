@@ -15,6 +15,10 @@
 // http://tostring.it/2014/06/23/advanced-logging-with-nodejs/
 // https://strongloop.com/strongblog/compare-node-js-logging-winston-bunyan/
 
+// TODO: Add JSON Web Tokens to improve security
+// https://jwt.io/
+// https://github.com/auth0/node-jsonwebtoken
+
 // TODO: Add internationalization support. I'll probably use i18next + moment.js: 
 // https://www.i18next.com/
 // https://github.com/i18next/i18next-express-middleware
@@ -49,6 +53,7 @@ const mongoose = require('mongoose');
 const passport = require('passport');
 const httpBasicStrategy = require('./utils/httpbasicstrategy');
 const clientHttpBasicStrategy = require('./utils/clienthttpbasicstrategy');
+const clientPasswordStrategy = require('./utils/clientpasswordstrategy');
 const httpBearerStrategy = require('./utils/httpbearerstrategy');
 const rememberMeStrategy = require('./utils/remembermestrategy');
 const nodemailer = require('nodemailer');
@@ -146,6 +151,9 @@ passport.use(httpBasicStrategy);
 
 // Setting up Client's HTTP Basic Authentication
 passport.use('client-basic', clientHttpBasicStrategy);
+
+// Setting up Client's Password Authentication
+passport.use(clientPasswordStrategy);
 
 // Setting up HTTP Bearer Authentication
 passport.use(httpBearerStrategy);

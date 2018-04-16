@@ -8,9 +8,9 @@ const RememberMeToken = require('../models/remembermetoken');
 const rmstrategy = new RememberMeStrategy(
     { path: '/', httpOnly: true, maxAge: RememberMeToken.MAX_REMEMBER_ME_TOKEN_AGE },
     (rmcookie, done) => {
-        let plainToken = RememberMeToken.hashToken(rmcookie.token);
+        let hashedToken = RememberMeToken.hashToken(rmcookie.token);
         RememberMeToken.findOneAndRemove({
-            token: plainToken,
+            token: hashedToken,
             expiration_date: { $gt: new Date() }
         }).populate('user')
             .exec()

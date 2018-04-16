@@ -33,7 +33,7 @@ exports.login = function (req, res, next) {
         failureFlash: true
     })(req, res, function () {
         if (req.body.remember_me) {
-            let rmtoken = new RememberMeToken({ user: req.user._id })
+            let rmtoken = new RememberMeToken({ user: req.user._id });
             rmtoken.generateToken().then((plainToken => rmtoken.save()
                 .then(() => {
                     let cookie = { email: req.user.email, token: plainToken }

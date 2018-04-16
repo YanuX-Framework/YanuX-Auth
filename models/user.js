@@ -4,14 +4,18 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const passportLocalMongoose = require('passport-local-mongoose');
 const crypto = require('crypto');
-const maxResetPasswordTokenAge = 86400000 // 1 day
+const maxResetPasswordTokenAge = 1 * 24 * 60 * 60 * 1000 // 1 day
 
 const ResetPasswordTokenSchema = new Schema({
     token: { type: String, required: true },
-    expiration_date: {
-        type: Date, required: true,
-        default: new Date(new Date().getTime() + maxResetPasswordTokenAge)
+    expiration_date: { type: Date, required: true }
+});
+
+ResetPasswordTokenSchema.pre('validate', function (next) {
+    if (!this.expiration_date) {
+        this.expiration_date = new Date(new Date().getTime() + maxResetPasswordTokenAge);
     }
+    next();
 });
 
 const UserSchema = new Schema({
@@ -34,9 +38,7 @@ UserSchema.statics.fetchUserByResetPasswordToken = function (email, token) {
 
 UserSchema.methods.clearResetPasswordToken = function () {
     return this.update({
-        $unset: {
-            reset_password_token: 1
-        }
+        $unset: { reset_password_token: 1 }
     });
 };
 
