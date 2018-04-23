@@ -9,6 +9,8 @@ const ClientSchema = new mongoose.Schema({
     id: { type: String, required: true },
     // TODO: Perhaps I should hash the secret.
     secret: { type: String, required: true },
+    // TODO: Should the redirect_uri be ALWAYS required
+    redirectUri: { type: String, required: true },
     user: { type: Schema.Types.ObjectId, ref: 'User', required: true },
 });
 

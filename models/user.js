@@ -8,12 +8,12 @@ const maxResetPasswordTokenAge = 1 * 24 * 60 * 60 * 1000 // 1 day
 
 const ResetPasswordTokenSchema = new Schema({
     token: { type: String, required: true },
-    expiration_date: { type: Date, required: true }
+    expirationDate: { type: Date, required: true }
 });
 
 ResetPasswordTokenSchema.pre('validate', function (next) {
-    if (!this.expiration_date) {
-        this.expiration_date = new Date(new Date().getTime() + maxResetPasswordTokenAge);
+    if (!this.expirationDate) {
+        this.expirationDate = new Date(new Date().getTime() + maxResetPasswordTokenAge);
     }
     next();
 });
@@ -21,7 +21,8 @@ ResetPasswordTokenSchema.pre('validate', function (next) {
 const UserSchema = new Schema({
     email: { type: String, required: true, unique: true },
     password: { type: String },
-    reset_password_token: ResetPasswordTokenSchema
+    resetPasswordToken: ResetPasswordTokenSchema,
+    rememberMeTokens: [{ type: Schema.Types.ObjectId, ref: "RememberMeToken" }]
 });
 
 UserSchema.statics.hashToken = function (plainToken) {
@@ -31,20 +32,20 @@ UserSchema.statics.hashToken = function (plainToken) {
 UserSchema.statics.fetchUserByResetPasswordToken = function (email, token) {
     return this.findOne({
         'email': email,
-        'reset_password_token.token': token,
-        'reset_password_token.expiration_date': { $gt: new Date() }
+        'resetPasswordToken.token': token,
+        'resetPasswordToken.expirationDate': { $gt: new Date() }
     });
 };
 
 UserSchema.methods.clearResetPasswordToken = function () {
     return this.update({
-        $unset: { reset_password_token: 1 }
+        $unset: { resetPasswordToken: 1 }
     });
 };
 
 UserSchema.methods.generateResetPasswordToken = function () {
     let plainToken = crypto.randomBytes(32).toString('hex');
-    this.reset_password_token = {
+    this.resetPasswordToken = {
         token: this.constructor.hashToken(plainToken),
     };
     return plainToken;

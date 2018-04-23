@@ -28,17 +28,17 @@ oauth2_server.grant(oauth2orize.grant.code(function (client, redirectUri, user, 
     new AuthorizationCode({
         client: client._id,
         user: user._id,
-        value: uid(16),
+        code: uid(16),
         redirectUri: redirectUri
     }).save()
-        .then(code => callback(null, code.value))
+        .then(code => callback(null, code.code))
         .catch(err => callback(err))
 }));
 
 oauth2_server.exchange(oauth2orize.exchange.code(function (client, code, redirectUri, callback) {
-    AuthorizationCode.findOne({ value: code })
+    AuthorizationCode.findOne({ client: client, code: code })
         .then(authorizationCode => {
-            if (authorizationCode && authorizationCode.client.equals(client._id)) {
+            if (authorizationCode && authorizationCode.redirectUri === redirectUri) {
                 return authorizationCode.remove();
             } else {
                 return Promise.reject(new InvalidAuthorizationCodeError());
@@ -47,10 +47,10 @@ oauth2_server.exchange(oauth2orize.exchange.code(function (client, code, redirec
             return new AccessToken({
                 client: authorizationCode.client,
                 user: authorizationCode.user,
-                value: uid(256)
+                token: uid(256)
             }).save();
         }).then(accessToken => {
-            callback(null, accessToken.value, null, { expires_in: 86400 });
+            callback(null, accessToken.token, null, { expires_in: ((accessToken.expirationDate.getTime()) - (new Date().getTime())) / 1000 });
         }).catch(err => {
             if (err instanceof InvalidAuthorizationCodeError) {
                 return callback(null, false)
@@ -65,12 +65,12 @@ oauth2_server.exchange(oauth2orize.exchange.refreshToken(function (client, refre
     console.log("Refresh Token Request Received");
 }));
 
-oauth2_server.exchange(oauth2orize.exchange.clientCredentials(function(client, scope, body, authInfo, done) {
+oauth2_server.exchange(oauth2orize.exchange.clientCredentials(function (client, scope, body, authInfo, callback) {
     // TODO: Implement Client Credentials Token: https://github.com/jaredhanson/oauth2orize/blob/master/lib/exchange/clientCredentials.js
     console.log("Client Credentials Request Received");
 }));
 
-oauth2_server.exchange(oauth2_server.exchange.password(function(client, username, password, scope, body, authInfo, done) {
+oauth2_server.exchange(oauth2orize.exchange.password(function (client, username, password, scope, body, authInfo, callback) {
     // TODO: Implement Password Token: https://github.com/jaredhanson/oauth2orize/blob/master/lib/exchange/password.js
     console.log("Password Request Received");
 }));
@@ -79,6 +79,7 @@ module.exports.authorization = [
     oauth2_server.authorize(function (clientId, redirectUri, callback) {
         Client.findOne({ id: clientId })
             .then(client => {
+                // TODO: I'm not sure that the current implementation is fully compliant with: https://tools.ietf.org/html/rfc6749#section-3.1.2.3
                 if (client && client.redirectUri === redirectUri) {
                     return callback(null, client, redirectUri);
                 } else {

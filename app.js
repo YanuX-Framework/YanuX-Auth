@@ -1,6 +1,8 @@
 'use strict';
 
 // WiP: Add OAuth 2.0 server support. There are at least 2 main npm packages for that:
+// https://tools.ietf.org/html/rfc6749
+// https://tools.ietf.org/html/rfc8252
 // https://www.npmjs.com/package/oauth2orize
 // https://www.npmjs.com/package/oauth2-server
 // https://www.npmjs.com/package/node-oauth2-server
@@ -8,16 +10,25 @@
 // https://blog.cloudboost.io/how-to-make-an-oauth-2-server-with-node-js-a6db02dc2ce7
 // https://tech.zilverline.com/2017/03/17/nodejs-oauth2-provider
 // https://oauth.net/code/
+// http://scottksmith.com/blog/2014/07/02/beer-locker-building-a-restful-api-with-node-oauth2-server/
+// https://www.digitalocean.com/community/tutorials/an-introduction-to-oauth-2
+
+// TODO: Add JSON Web Tokens to improve security
+// https://jwt.io/
+// https://auth0.com/learn/json-web-tokens/
+// https://github.com/auth0/node-jsonwebtoken
+// https://zapier.com/engineering/apikey-oauth-jwt/
+// NOTE: In fact, I may also extend OAuth 2 support to JWT:
+// https://tools.ietf.org/html/rfc7523
+// https://github.com/xtuple/passport-oauth2-jwt-bearer
+// https://github.com/xtuple/oauth2orize-jwt-bearer
+// https://developers.google.com/identity/protocols/OAuth2ServiceAccount
 
 // WiP: Refactor code so that I have proper log support:
 // http://www.jyotman.xyz/post/logging-in-node.js-done-right
 // https://blog.risingstack.com/node-js-logging-tutorial/
 // http://tostring.it/2014/06/23/advanced-logging-with-nodejs/
 // https://strongloop.com/strongblog/compare-node-js-logging-winston-bunyan/
-
-// TODO: Add JSON Web Tokens to improve security
-// https://jwt.io/
-// https://github.com/auth0/node-jsonwebtoken
 
 // TODO: Add internationalization support. I'll probably use i18next + moment.js: 
 // https://www.i18next.com/

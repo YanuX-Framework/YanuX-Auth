@@ -11,6 +11,7 @@ exports.postClient = function (req, res, next) {
     client.name = req.body.name;
     client.id = req.body.id;
     client.secret = req.body.secret;
+    client.redirectUri = req.body.redirect_uri;
     client.user = req.user._id;
     // Save the client and check for errors
     client.save()

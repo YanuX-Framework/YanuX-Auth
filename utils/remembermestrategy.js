@@ -11,7 +11,7 @@ const rmstrategy = new RememberMeStrategy(
         let hashedToken = RememberMeToken.hashToken(rmcookie.token);
         RememberMeToken.findOneAndRemove({
             token: hashedToken,
-            expiration_date: { $gt: new Date() }
+            expirationDate: { $gt: new Date() }
         }).populate('user')
             .exec()
             .then(rmtoken => {
