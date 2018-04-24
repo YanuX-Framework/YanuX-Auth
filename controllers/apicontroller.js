@@ -1,7 +1,7 @@
 'use strict';
 
 // TODO: Create full RESTful API and/or pages to manage clients.
-var Client = require('../models/client');
+const Client = require('../models/client');
 
 // Create endpoint /api/client for POST
 exports.postClient = function (req, res, next) {

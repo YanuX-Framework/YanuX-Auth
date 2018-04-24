@@ -22,8 +22,14 @@ const UserSchema = new Schema({
     email: { type: String, required: true, unique: true },
     password: { type: String },
     resetPasswordToken: ResetPasswordTokenSchema,
-    rememberMeTokens: [{ type: Schema.Types.ObjectId, ref: "RememberMeToken" }]
 });
+
+UserSchema.virtual('rememberMeTokens', {
+    ref: 'RememberMeToken', // The model to use
+    localField: '_id',
+    foreignField: 'user',
+    justOne: false
+  });
 
 UserSchema.statics.hashToken = function (plainToken) {
     return crypto.createHash('sha256').update(plainToken).digest('hex');
