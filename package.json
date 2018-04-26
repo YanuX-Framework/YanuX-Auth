@@ -13,13 +13,13 @@
     "connect-flash": "^0.1.1",
     "consolidate": "^0.15.1",
     "cookie-parser": "^1.4.3",
-    "email-templates": "^3.5.2",
+    "email-templates": "^3.6.0",
     "express": "^4.16.3",
     "express-session": "^1.15.6",
     "express-validator": "^5.1.2",
     "jquery": "^3.3.1",
     "less-middleware": "^2.2.1",
-    "mongoose": "^5.0.14",
+    "mongoose": "^5.0.16",
     "morgan": "^1.9.0",
     "nodemailer": "^4.6.4",
     "nunjucks": "^3.1.2",
@@ -35,6 +35,6 @@
     "serve-favicon": "^2.5.0",
     "uid2": "0.0.3",
     "validator": "^9.4.1",
-    "winston": "^2.4.1"
+    "winston": "^2.4.2"
   }
 }
