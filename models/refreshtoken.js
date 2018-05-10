@@ -10,6 +10,7 @@ const RefreshTokenSchema = new mongoose.Schema({
     accessToken: { type: Schema.Types.ObjectId, ref: 'AccessToken', required: true },
     // TODO: Perhaps I should hash the token.
     token: { type: String, required: true },
+    scope: { type: String, required: false },
     expirationDate: { type: Date, required: true }
 });
 

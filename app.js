@@ -51,7 +51,6 @@
 
 const express = require('express');
 const morgan = require('morgan');
-const logger = require('./logger');
 const cons = require('consolidate');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
@@ -62,13 +61,14 @@ const favicon = require('serve-favicon');
 const lessMiddleware = require('less-middleware');
 const mongoose = require('mongoose');
 const passport = require('passport');
+const nodemailer = require('nodemailer');
+const EmailTemplate = require('email-templates');
+const logger = require('./logger');
 const httpBasicStrategy = require('./utils/httpbasicstrategy');
 const clientHttpBasicStrategy = require('./utils/clienthttpbasicstrategy');
 const clientPasswordStrategy = require('./utils/clientpasswordstrategy');
 const httpBearerStrategy = require('./utils/httpbearerstrategy');
 const rememberMeStrategy = require('./utils/remembermestrategy');
-const nodemailer = require('nodemailer');
-const EmailTemplate = require('email-templates');
 
 // TODO: I should probably store the session/secret somewhere safe and only load it into memory when needed.
 const secret = 'efX4U4RtG1D0by7vWls6l5mYfAfpY4KKkGrWqIs1';

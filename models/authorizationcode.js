@@ -11,7 +11,7 @@ var AuthorizationCodeSchema = new mongoose.Schema({
     // TODO: Perhaps I should hash the code.
     code: { type: String, required: true },
     redirectUri: { type: String, required: true },
-    // TODO: Should I include a timestamp to check for the code validity?
+    scope: { type: String, required: false },
     expirationDate: { type: Date, required: true }
 });
 
