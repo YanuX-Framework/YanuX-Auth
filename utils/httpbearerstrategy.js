@@ -4,7 +4,7 @@ var HttpBearerStrategy = require('passport-http-bearer').Strategy
 var AccessToken = require('../models/accesstoken');
 
 module.exports = new HttpBearerStrategy((accessToken, callback) => {
-    AccessToken.findOne({ token: accessToken }).populate('user').exec()
+    AccessToken.findOne({ token: AccessToken.hashToken(accessToken) }).populate('user').exec()
         .then(token => {
             if (token && token.user) {
                 // TODO: Implement Scopes!

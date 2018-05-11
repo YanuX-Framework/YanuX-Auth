@@ -33,16 +33,15 @@ exports.login = function (req, res, next) {
         failureFlash: true
     })(req, res, function () {
         if (req.body.remember_me) {
-            let rmtoken = new RememberMeToken({ user: req.user._id });
-            rmtoken.generateToken().then((plainToken => rmtoken.save()
-                .then(() => {
-                    let cookie = { email: req.user.email, token: plainToken }
-                    res.cookie('remember_me', cookie, RememberMeStrategy.cookieOptions);
-                    res.redirect(req.session.returnTo ? req.session.returnTo : '/');
-                })
-            ));
+            let rmtoken = new RememberMeToken({ user: req.user });
+            let plainToken = rmtoken.generateToken();
+            rmtoken.save().then(rmtoken => {
+                let cookie = { email: req.user.email, token: plainToken }
+                res.cookie('remember_me', cookie, RememberMeStrategy.cookieOptions);
+                res.redirect(req.session.returnTo ? req.session.returnTo : '/');
+            });
         } else {
-            res.redirect('/');
+            res.redirect(req.session.returnTo ? req.session.returnTo : '/');
         }
     });
 };

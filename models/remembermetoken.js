@@ -1,7 +1,7 @@
 'use strict';
 
 const mongoose = require('mongoose');
-const crypto = require('crypto');
+const cryptoUtils = require('../utils/crypto');
 const Schema = mongoose.Schema;
 const maxRememberMeTokenAge = 30 * 24 * 60 * 60 * 1000 // 30 days
 
@@ -20,29 +20,15 @@ RememberMeTokenSchema.pre('validate', function (next) {
     next();
 });
 
-RememberMeTokenSchema.statics.hashToken = function (token) {
-    return crypto.createHash('sha256').update(token).digest('hex');
+RememberMeTokenSchema.statics.hashToken = function (plainToken) {
+    return cryptoUtils.hashData(plainToken);
 };
 
 RememberMeTokenSchema.methods.generateToken = function () {
     let self = this;
-    let plainToken = crypto.randomBytes(32).toString('hex');
-    let hashedToken = this.constructor.hashToken(plainToken);
-
-    return new Promise(function (resolve, reject) {
-        self.model('RememberMeToken').count({
-            user: self.user,
-            token: hashedToken,
-            expirationDate: { $gt: new Date() }
-        }).then(count => {
-            if (count > 0) {
-                resolve(self.generateToken());
-            } else {
-                self.token = hashedToken;
-                resolve(plainToken);
-            }
-        }).catch(err => reject(err));
-    });
+    let plainToken = cryptoUtils.randomBytes(32);
+    this.token = this.constructor.hashToken(plainToken);
+    return plainToken;
 };
 
 module.exports = mongoose.model('RememberMeToken', RememberMeTokenSchema);

@@ -1,7 +1,7 @@
 'use strict';
 
 const oauth2orize = require('oauth2orize');
-const uid = require('uid2');
+const cryptoUtils = require('../utils/crypto');
 const User = require('../models/user');
 const Client = require('../models/client');
 const AccessToken = require('../models/accesstoken');
@@ -13,10 +13,16 @@ const OAuth2InvalidRefreshToken = require('../errors/oauth2invalidrefreshtoken')
 const OAuth2InvalidUsernameOrPassword = require('../errors/oauth2invalidusernameorpassword');
 const OAuth2Server = oauth2orize.createServer();
 
+/**
+ * Registers a function used to serialize client objects into the session.
+ */
 OAuth2Server.serializeClient(function (client, callback) {
     return callback(null, client._id);
 });
 
+/**
+ * Registers a function used to deserialize client objects out of the session.
+ */
 OAuth2Server.deserializeClient(function (id, callback) {
     Client.findById(id)
         .then(client => callback(null, client))
@@ -26,90 +32,106 @@ OAuth2Server.deserializeClient(function (id, callback) {
 /**
  * Authorization Request Dialog
  */
-const OAuth2ServerAuthorization = [OAuth2Server.authorize(function (clientId, redirectUri, callback) {
-    // TODO: I'm not sure that the current implementation is fully compliant with: https://tools.ietf.org/html/rfc6749#section-3.1.2.3
-    Client.findOne({ id: clientId, redirectUri: redirectUri })
-        .then(client => {
-            if (client) {
-                return callback(null, client, redirectUri);
-            } else {
-                return callback(null, false);
-            }
-        }).catch(err => callback(err));
-}), function (req, res, next) {
-    res.render('oauth2/authorization_dialog', {
-        title: 'Authorization Request',
-        user: req.user,
-        client: req.oauth2.client,
-        transactionID: req.oauth2.transactionID
-    });
-}]
+const OAuth2ServerAuthorization = [
+    /**
+     * Parses requests to obtain authorization.
+     */
+    OAuth2Server.authorize(function (clientId, redirectUri, callback) {
+        // NOTE: I'm not sure that the current implementation is fully compliant with: https://tools.ietf.org/html/rfc6749#section-3.1.2.3
+        Client.findOne({ id: clientId, redirectUri: redirectUri })
+            .then(client => {
+                if (client) {
+                    return callback(null, client, redirectUri);
+                } else {
+                    return callback(null, false);
+                }
+            }).catch(err => callback(err));
+    }),
+    /**
+     * Displays the Autorization Request Dialog
+     */
+    function (req, res, next) {
+        res.render('oauth2/authorization_dialog', {
+            title: 'Authorization Request',
+            user: req.user,
+            client: req.oauth2.client,
+            transactionID: req.oauth2.transactionID
+        });
+    }]
 
 /**
  * Implicit Grant
+ * https://github.com/jaredhanson/oauth2orize/blob/master/lib/grant/token.js
  */
 OAuth2Server.grant(oauth2orize.grant.token(function (client, user, ares, callback) {
+    let accessTokenUid = cryptoUtils.generateUid(256);
     return new AccessToken({
         client: client,
         user: user,
-        token: uid(256),
+        tokenHash: accessTokenUid,
         scope: ares.scope ? ares.scope : null
     }).save().then(accessToken => {
-        callback(null, accessToken.token, null,
+        callback(null, accessTokenUid, null,
             { expires_in: Math.floor((accessToken.expirationDate.getTime() - new Date().getTime()) / 1000) });
     }).catch(err => callback(err));
 }));
 
 /**
- * Authorization Code Response
+ * Authorization Code Grant
+ * https://github.com/jaredhanson/oauth2orize/blob/master/lib/grant/code.js
  */
 OAuth2Server.grant(oauth2orize.grant.code(function (client, redirectUri, user, ares, callback) {
     if (redirectUri && client.redirectUri !== redirectUri) {
         callback(new OAuth2InvalidRedirectURIError());
     } else {
+        let authorizationCodeUid = AuthorizationCode.generateUid();
         new AuthorizationCode({
             client: client._id,
             user: user._id,
-            code: uid(16),
+            codeHash: authorizationCodeUid,
             redirectUri: redirectUri,
             scope: ares.scope ? ares.scope : null
         }).save()
-            .then(code => callback(null, code.code))
+            .then(code => callback(null, authorizationCodeUid))
             .catch(err => callback(err));
     }
 }));
 
 /**
- * Authorization Code Grant
+ * Authorization Code Exchange
+ * https://github.com/jaredhanson/oauth2orize/blob/master/lib/exchange/authorizationCode.js
  */
-OAuth2Server.exchange(oauth2orize.exchange.code(function (client, code, redirectUri, callback) {
+OAuth2Server.exchange(oauth2orize.exchange.authorizationCode(function (client, code, redirectUri, callback) {
+    let accessTokenUid, refreshTokenUid;
     AuthorizationCode.findOneAndRemove({
         client: client,
-        code: code,
+        code: AuthorizationCode.hashToken(code),
         redirectUri: redirectUri,
         expirationDate: { $gt: new Date() }
     }).then(authorizationCode => {
         if (authorizationCode) {
+            accessTokenUid = cryptoUtils.generateUid(256);
             return new AccessToken({
                 client: authorizationCode.client,
                 user: authorizationCode.user,
                 scope: authorizationCode.scope,
-                token: uid(256),
+                tokenHash: accessTokenUid
             }).save();
         } else {
             return Promise.reject(new OAuth2InvalidAuthorizationCodeError());
         }
     }).then(accessToken => {
+        refreshTokenUid = cryptoUtils.generateUid(256);
         return new RefreshToken({
             client: accessToken.client,
             user: accessToken.user,
             accessToken: accessToken,
-            token: uid(256),
+            tokenHash: refreshTokenUid
         }).save();
     }).then(refreshToken => {
         callback(null,
-            refreshToken.accessToken.token,
-            refreshToken.token,
+            accessTokenUid,
+            refreshTokenUid,
             { expires_in: Math.floor((refreshToken.accessToken.expirationDate.getTime() - new Date().getTime()) / 1000) })
     }).catch(err => {
         if (err instanceof OAuth2InvalidAuthorizationCodeError) {
@@ -126,8 +148,9 @@ OAuth2Server.exchange(oauth2orize.exchange.code(function (client, code, redirect
  * https://github.com/jaredhanson/oauth2orize/blob/master/lib/exchange/refreshToken.js
  */
 OAuth2Server.exchange(oauth2orize.exchange.refreshToken(function (client, refreshToken, scope, callback) {
+    let accessTokenUid, refreshTokenUid;
     RefreshToken.findOneAndRemove({
-        token: refreshToken,
+        token: RefreshToken.hashToken(refreshToken),
         client: client,
         expirationDate: { $gt: new Date() }
     }).then(refToken => {
@@ -138,21 +161,23 @@ OAuth2Server.exchange(oauth2orize.exchange.refreshToken(function (client, refres
             return Promise.reject(new OAuth2InvalidRefreshToken());
         }
     }).then(accessToken => {
+        accessTokenUid = cryptoUtils.generateUid(256);
         return new AccessToken({
             client: accessToken.client,
             user: accessToken.user,
             scope: scope,
-            token: uid(256),
+            tokenHash: accessTokenUid
         }).save();
     }).then(accessToken => {
+        refreshTokenUid = cryptoUtils.generateUid(256);
         return new RefreshToken({
             client: accessToken.client,
             user: accessToken.user,
             accessToken: accessToken,
-            token: uid(256),
+            tokenHash: refreshTokenUid
         }).save();
     }).then(refreshToken => {
-        callback(null, refreshToken.accessToken.token, refreshToken.token,
+        callback(null, accessTokenUid, refreshTokenUid,
             { expires_in: Math.floor((refreshToken.accessToken.expirationDate.getTime() - new Date().getTime()) / 1000) })
     }).catch(err => {
         if (err instanceof OAuth2InvalidRefreshToken) {
@@ -168,12 +193,13 @@ OAuth2Server.exchange(oauth2orize.exchange.refreshToken(function (client, refres
  * https://github.com/jaredhanson/oauth2orize/blob/master/lib/exchange/clientCredentials.js
  */
 OAuth2Server.exchange(oauth2orize.exchange.clientCredentials(function (client, scope, body, authInfo, callback) {
+    let accessTokenUid = cryptoUtils.generateUid(256);
     return new AccessToken({
         client: client,
-        token: uid(256),
+        tokenHash: accessTokenUid,
         scope: scope
     }).save().then(accessToken => {
-        callback(null, accessToken.token, null,
+        callback(null, accessTokenUid, null,
             { expires_in: Math.floor((accessToken.expirationDate.getTime() - new Date().getTime()) / 1000) });
     }).catch(err => callback(err));
 }));
@@ -183,26 +209,29 @@ OAuth2Server.exchange(oauth2orize.exchange.clientCredentials(function (client, s
  * https://github.com/jaredhanson/oauth2orize/blob/master/lib/exchange/password.js
  */
 OAuth2Server.exchange(oauth2orize.exchange.password(function (client, username, password, scope, body, authInfo, callback) {
+    let accessTokenUid, refreshTokenUid;
     User.authenticate()(username, password).then(authentication => {
         if (authentication && authentication.user) {
+            accessTokenUid = cryptoUtils.generateUid(256);
             return new AccessToken({
                 client: client,
                 user: authentication.user,
                 scope: scope,
-                token: uid(256),
+                tokenHash: accessTokenUid
             }).save();
         } else {
             return Promise.reject(new OAuth2InvalidUsernameOrPassword());
         }
     }).then(accessToken => {
+        refreshTokenUid = cryptoUtils.generateUid(256);
         return new RefreshToken({
             client: accessToken.client,
             user: accessToken.user,
             accessToken: accessToken,
-            token: uid(256),
+            tokenHash: refreshTokenUid
         }).save();
     }).then(refreshToken => {
-        callback(null, refreshToken.accessToken.token, refreshToken.token,
+        callback(null, accessTokenUid, refreshTokenUid,
             { expires_in: Math.floor((refreshToken.accessToken.expirationDate.getTime() - new Date().getTime()) / 1000) })
     }).catch(err => {
         if (err instanceof OAuth2InvalidUsernameOrPassword) {
@@ -215,10 +244,17 @@ OAuth2Server.exchange(oauth2orize.exchange.password(function (client, username, 
 
 module.exports.authorization = OAuth2ServerAuthorization;
 
+/**
+ * Handle a user's response to an authorization dialog.
+ */
 module.exports.decision = [
     OAuth2Server.decision()
 ]
 
+/**
+ * Handle requests to exchange an authorization grant for an access token,
+ * otherwise respond to errors encountered in OAuth 2.0 endpoints.
+ */
 module.exports.token = [
     OAuth2Server.token(),
     OAuth2Server.errorHandler()

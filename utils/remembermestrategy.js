@@ -15,7 +15,8 @@ const rmstrategy = new RememberMeStrategy(
         }).populate('user')
             .exec()
             .then(rmtoken => {
-                if (rmtoken && rmtoken.user) {
+                if (rmtoken && rmtoken.user
+                    && rmtoken.user.email === rmcookie.email) {
                     return done(null, rmtoken.user);
                 } else {
                     return done(null, false);
@@ -26,12 +27,11 @@ const rmstrategy = new RememberMeStrategy(
         let rmtoken = new RememberMeToken({
             user: user._id,
         })
-        rmtoken.generateToken().then((plainToken) => {
-            let cookie = { email: user.email, token: plainToken }
-            rmtoken.save()
-                .then(() => done(null, cookie))
-                .catch(err => done(err));
-        })
+        let plainToken = rmtoken.generateToken()
+        let cookie = { email: user.email, token: plainToken }
+        rmtoken.save()
+            .then(() => done(null, cookie))
+            .catch(err => done(err))
     }
 );
 
