@@ -1,13 +1,13 @@
 'use strict';
 
-//// User Authentication Controller ////
+// -----------------------------------------------------------------------------
+// -- User Authentication Controller -------------------------------------------
 // -----------------------------------------------------------------------------
 // Most of the heavy lifting is done behind the scenes thanks to 'passport-local-mongoose':
 // https://github.com/saintedlama/passport-local-mongoose
-// To implement the 'Remember Me' feature, it is combine with 'passport-remember-me':
+// To implement the 'Remember Me' feature, it is combined with 'passport-remember-me':
 // https://github.com/jaredhanson/passport-remember-me
 // -----------------------------------------------------------------------------
-const mongoose = require('mongoose');
 const passport = require('passport');
 const crypto = require('crypto');
 const { check, validationResult } = require('express-validator/check');

@@ -11,11 +11,12 @@ const logger = new winston.Logger({
                 return (new Date()).toISOString();
             }
         })
-    ]
+    ],
+    exitOnError: false
 });
 
 logger.stream = {
-    write: function(message, encoding){
+    write: function (message, encoding) {
         logger.info(message);
     }
 };

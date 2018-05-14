@@ -1,6 +1,73 @@
 'use strict';
 
-// WiP: Add OAuth 2.0 server support. There are at least 2 main npm packages for that:
+// -----------------------------------------------------------------------------
+// -- TODO ---------------------------------------------------------------------
+// -----------------------------------------------------------------------------
+// TODO: Add Icons to certain UI elememnts. Here are some possibilities:
+// https://fontawesome.com/
+// http://ionicons.com/
+// https://useiconic.com/open/
+// https://octicons.github.com/
+// https://feathericons.com/
+// http://elusiveicons.com/
+// https://zurb.com/playground/foundation-icon-fonts-3
+// https://material.io/tools/icons/
+// https://materialdesignicons.com/
+// http://glyph.smarticons.co/
+// http://demo.amitjakhu.com/dripicons/
+// https://danklammer.com/bytesize-icons/
+// http://ikons.piotrkwiatkowski.co.uk/
+// -----------------------------------------------------------------------------
+// TODO: Add reCAPTCHA to user registration and other forms.
+// -----------------------------------------------------------------------------
+// https://www.google.com/recaptcha/intro/v3beta.html
+// https://www.npmjs.com/package/express-recaptcha
+// -----------------------------------------------------------------------------
+// TODO: Add JSON Web Tokens to improve security
+// -----------------------------------------------------------------------------
+// https://jwt.io/
+// https://auth0.com/learn/json-web-tokens/
+// https://github.com/auth0/node-jsonwebtoken
+// https://zapier.com/engineering/apikey-oauth-jwt/
+// NOTE: In fact, I may also extend OAuth 2 support to JWT:
+// https://tools.ietf.org/html/rfc7523
+// https://github.com/xtuple/passport-oauth2-jwt-bearer
+// https://github.com/xtuple/oauth2orize-jwt-bearer
+// https://developers.google.com/identity/protocols/OAuth2ServiceAccount
+// -----------------------------------------------------------------------------
+// TODO: Add internationalization support. I'll probably use i18next + moment.js:
+// -----------------------------------------------------------------------------
+// https://www.i18next.com/
+// https://github.com/i18next/i18next-express-middleware
+// https://www.npmjs.com/package/moment
+// But Globalize also seems to be pretty decent and more complete (with number, date and currency formatting):
+// https://github.com/globalizejs/globalize
+// But here are some other options below:
+// https://github.com/airbnb/polyglot.js
+// https://www.npmjs.com/package/i18n-2
+// https://github.com/mashpie/i18n-node
+// -----------------------------------------------------------------------------
+// TODO: Add unit testing to my code. These are just some tutorials that I should look at:
+// -----------------------------------------------------------------------------
+// https://alexanderpaterson.com/posts/how-to-start-unit-testing-your-express-apps
+// https://scotch.io/tutorials/test-a-node-restful-api-with-mocha-and-chai
+// https://glebbahmutov.com/blog/how-to-correctly-unit-test-express-server/
+// These may also be interesting:
+// http://mherman.org/blog/2016/09/12/testing-node-and-express/
+// https://codeburst.io/unit-testing-in-express-with-promise-based-middleware-and-controllers-7d3d59ae61f8
+// -----------------------------------------------------------------------------
+// -- WiP ----------------------------------------------------------------------
+// -----------------------------------------------------------------------------
+// WiP: Refactor code so that I have proper log support (I think that this is mostly done but I'll have to check again):
+// -----------------------------------------------------------------------------
+// http://www.jyotman.xyz/post/logging-in-node.js-done-right
+// https://blog.risingstack.com/node-js-logging-tutorial/
+// http://tostring.it/2014/06/23/advanced-logging-with-nodejs/
+// https://strongloop.com/strongblog/compare-node-js-logging-winston-bunyan/
+// -----------------------------------------------------------------------------
+// -- DONE ---------------------------------------------------------------------
+// -----------------------------------------------------------------------------
+// DONE: Add OAuth 2.0 server support. There are at least 2 main npm packages for that:
 // https://tools.ietf.org/html/rfc6749
 // https://tools.ietf.org/html/rfc8252
 // https://www.npmjs.com/package/oauth2orize
@@ -12,42 +79,6 @@
 // https://oauth.net/code/
 // http://scottksmith.com/blog/2014/07/02/beer-locker-building-a-restful-api-with-node-oauth2-server/
 // https://www.digitalocean.com/community/tutorials/an-introduction-to-oauth-2
-
-// TODO: Add JSON Web Tokens to improve security
-// https://jwt.io/
-// https://auth0.com/learn/json-web-tokens/
-// https://github.com/auth0/node-jsonwebtoken
-// https://zapier.com/engineering/apikey-oauth-jwt/
-// NOTE: In fact, I may also extend OAuth 2 support to JWT:
-// https://tools.ietf.org/html/rfc7523
-// https://github.com/xtuple/passport-oauth2-jwt-bearer
-// https://github.com/xtuple/oauth2orize-jwt-bearer
-// https://developers.google.com/identity/protocols/OAuth2ServiceAccount
-
-// WiP: Refactor code so that I have proper log support:
-// http://www.jyotman.xyz/post/logging-in-node.js-done-right
-// https://blog.risingstack.com/node-js-logging-tutorial/
-// http://tostring.it/2014/06/23/advanced-logging-with-nodejs/
-// https://strongloop.com/strongblog/compare-node-js-logging-winston-bunyan/
-
-// TODO: Add internationalization support. I'll probably use i18next + moment.js: 
-// https://www.i18next.com/
-// https://github.com/i18next/i18next-express-middleware
-// https://www.npmjs.com/package/moment
-// But Globalize also seems to be pretty decent and more complete (with number, date and currency formatting):
-// https://github.com/globalizejs/globalize
-// But here are some other options below:
-// https://github.com/airbnb/polyglot.js
-// https://www.npmjs.com/package/i18n-2
-// https://github.com/mashpie/i18n-node
-
-// TODO: Add unit testing to my code. These are just some tutorials that I should look at:
-// https://alexanderpaterson.com/posts/how-to-start-unit-testing-your-express-apps
-// https://scotch.io/tutorials/test-a-node-restful-api-with-mocha-and-chai
-// https://glebbahmutov.com/blog/how-to-correctly-unit-test-express-server/
-// These may also be interesting:
-// http://mherman.org/blog/2016/09/12/testing-node-and-express/
-// https://codeburst.io/unit-testing-in-express-with-promise-based-middleware-and-controllers-7d3d59ae61f8
 
 const express = require('express');
 const morgan = require('morgan');
@@ -145,7 +176,7 @@ mongoose.connect('mongodb://localhost/yanux-auth')
     logger.debug('MongoDB Connection Succesful');
   }).catch((error) => {
     logger.debug(error);
-    //process.exit(1);
+    process.exit(1);
   });
 
 // Setting up user authentication
@@ -178,11 +209,14 @@ const index = require('./routes/index');
 const auth = require('./routes/auth');
 const oauth2 = require('./routes/oauth2');
 const api = require('./routes/api');
+const client = require('./routes/client')
 
 app.use('/', index);
 app.use('/auth', auth);
 app.use('/oauth2', oauth2);
 app.use('/api', api);
+app.use('/client', client);
+
 
 //Setting up error handling
 // catch 404 and forward to error handler

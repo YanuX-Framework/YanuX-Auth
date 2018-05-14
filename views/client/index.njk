@@ -1,0 +1,33 @@
+{% extends "layout.njk" %}
+{% block body %}
+<h1>{{ title }}</h1>
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Name</th>
+                <th scope="col">Secret</th>
+                <th scope="col">Redirect URI</td>
+                <th scope="col">Actions</td>
+            </tr>
+        </thead>
+        <tbody>
+            {% for client in clients %}
+                <tr>
+                    <td>{{ client.id }}</td>
+                    <td>{{ client.name }}</td>
+                    <td>{{ client.secret }}</td>
+                    <td>
+                        <a href="{{ client.redirectUri }}">
+                            {{ client.redirectUri }}
+                        </a>
+                    </td>
+                    <td>
+                        <button type="button" class="btn btn-primary">Edit</button>
+                        <button type="button" class="btn btn-danger">Delete</button>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

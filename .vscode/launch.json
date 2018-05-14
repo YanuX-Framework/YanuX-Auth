@@ -8,7 +8,9 @@
             "type": "node",
             "request": "launch",
             "name": "Debug YanuX Auth",
-            "program": "${workspaceFolder}/bin/www"
+            "program": "${workspaceFolder}/bin/www",
+            "outputCapture": "std",
+            //"console": "integratedTerminal"
         }
     ]
 }
