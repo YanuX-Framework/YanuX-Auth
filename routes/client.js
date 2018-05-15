@@ -9,4 +9,12 @@ router.get('/',
     authUtils.ensureLoggedIn,
     clientController.index);
 
+router.get('/:clientId',
+    authUtils.ensureLoggedIn,
+    clientController.show);
+
+router.delete('/:clientId',
+    authUtils.ensureLoggedIn,
+    clientController.delete);
+
 module.exports = router;

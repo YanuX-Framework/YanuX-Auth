@@ -89,6 +89,7 @@ const session = require('express-session');
 const flash = require('connect-flash');
 const path = require('path');
 const favicon = require('serve-favicon');
+const methodOverride = require('method-override')
 const lessMiddleware = require('less-middleware');
 const mongoose = require('mongoose');
 const passport = require('passport');
@@ -127,7 +128,7 @@ app.use(flash());
 app.use(session({
   secret: secret,
   resave: true,
-  saveUninitialized: true
+  saveUninitialized: false
 }));
 
 // Setting up automaticc LESS compilation to plain CSS
@@ -135,12 +136,17 @@ app.use(lessMiddleware(path.join(__dirname, 'public')));
 // Setting up the favicon.
 // uncomment after placing your favicon in /public.
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
+
+//Method Override to Allow FAKE Request Methods:
+app.use(methodOverride('_method', { methods: ['GET', 'POST'] }));
+
 // Setting up access to some JavaScript libraries placed under node_modules.
 app.use('/javascripts', express.static(__dirname + '/node_modules/jquery/dist')); // Redirect jQuery
 app.use('/javascripts', express.static(__dirname + '/node_modules/popper.js/dist')); // Redirect Popper.js
 app.use('/javascripts', express.static(__dirname + '/node_modules/bootstrap/dist/js')); // Redirect Bootstrap JavaScript
 // Setting up access to some CSS libraries placed under node_modules.
 app.use('/stylesheets', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/css'))); // Redirect Bootstrap CSS
+app.use('/stylesheets', express.static(path.join(__dirname, 'node_modules/font-awesome'))); // Redirect Font Awesome CSS
 // Setting direct access access to the public folder.
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -233,7 +239,27 @@ app.use(function (err, req, res, next) {
   res.locals.error = req.app.get('env') === 'development' ? err : {};
   // render the error page
   res.status(err.status || 500);
-  res.render('error.njk');
+  res.format({
+    'text/html': function () {
+      res.set('Content-Type', 'text/html');
+      res.render('error.njk');
+    },
+    'application/json': function () {
+      res.set('Content-Type', 'application/json');
+      res.json({
+        messageType: "error",
+        status: err.status,
+        message: err.message,
+        stack: err.stack
+      });
+    },
+    'default': function () {
+      res.set('Content-Type', 'text/plain');
+      res.send("Error Status: " + err.status
+        + " Message: " + err.message
+        + " Stack: " + err.stack);
+    }
+  });
 });
 
 module.exports = app;

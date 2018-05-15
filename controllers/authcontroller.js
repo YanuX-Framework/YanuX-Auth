@@ -32,6 +32,7 @@ exports.login = function (req, res, next) {
         failureRedirect: '/auth/login',
         failureFlash: true
     })(req, res, function () {
+        // TODO: Check if I can use a passport.authenticate callback instead of redefining the next middleware in-place.
         if (req.body.remember_me) {
             let rmtoken = new RememberMeToken({ user: req.user });
             let plainToken = rmtoken.generateToken();

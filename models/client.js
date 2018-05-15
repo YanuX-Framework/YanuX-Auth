@@ -5,11 +5,11 @@ const Schema = mongoose.Schema;
 
 // TODO: I should consider auto generating the client id and secret in order to enforce uniqueness, randomness, and strength.
 const ClientSchema = new mongoose.Schema({
-    name: { type: String, unique: true, required: true },
-    id: { type: String, required: true },
+    name: { type: String, required: true },
+    id: { type: String,  unique: true, required: true },
     // TODO: Perhaps I should hash the secret.
     secret: { type: String, required: true },
-    // TODO: Should the redirect_uri be ALWAYS required
+    // TODO: Should the redirect_uri be ALWAYS required?
     redirectUri: { type: String, required: true },
     user: { type: Schema.Types.ObjectId, ref: 'User', required: true },
 });

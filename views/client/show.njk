@@ -1,0 +1,19 @@
+{% extends "layout.njk" %}
+{% block body %}
+<h1>{{ title }}</h1>
+<form>
+  <div class="form-group">
+    <label for="clientName">Client Name</label>
+    <input type="text" class="form-control" id="clientName" placeholder="Enter a descriptive name for your client" value="{{ client.name }}">
+  </div>
+  <div class="form-group">
+    <label for="clientId">Client ID</label>
+    <input type="text" class="form-control" id="clientId" placeholder="Enter a unique ID for your client" value="{{ client.id }}">
+  </div>
+  <div class="form-group">
+    <label for="clientId">Secret</label>
+    <input type="text" class="form-control" id="clientId" placeholder="Enter a strong secret" value="{{ client.secret }}">
+  </div>
+  <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+{% endblock %}

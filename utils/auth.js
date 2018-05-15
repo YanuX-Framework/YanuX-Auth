@@ -3,8 +3,38 @@
 const passport = require('passport');
 const connectEnsureLogin = require('connect-ensure-login');
 
+
+const authenticateCallback = function (req, res, next) {
+    return function (err, user, info) {
+        if (err) {
+            return next(err);
+        } else if (!user) {
+            let error = new Error('Unauthorized')
+            error.status = 401;
+            return next(err)
+        } else {
+            req.logIn(user, function (err) {
+                if (err) { return next(err); }
+                return next();
+            });
+        }
+    }
+}
+
 // Passport Local Session-based Authentication
-module.exports.ensureLoggedIn = connectEnsureLogin.ensureLoggedIn('/auth/login');
+module.exports.ensureLoggedIn = function (req, res, next) {
+    const passportBasic = function () {
+        return passport.authenticate('basic', authenticateCallback(req, res, next), { session: false })(req, res, next);
+    };
+    const passportEnsureLoggedIn = function () {
+        return connectEnsureLogin.ensureLoggedIn('/auth/login')(req, res, next)
+    };
+    res.format({
+        'text/html': passportEnsureLoggedIn,
+        'application/json': passportBasic,
+        'default': passportEnsureLoggedIn
+    });
+}
 
 // HTTP Authentication
 module.exports.ensureHttpBasicAuth = passport.authenticate('basic', { session: false });
