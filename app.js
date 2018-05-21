@@ -89,8 +89,8 @@ const session = require('express-session');
 const flash = require('connect-flash');
 const path = require('path');
 const favicon = require('serve-favicon');
-const methodOverride = require('method-override')
-const lessMiddleware = require('less-middleware');
+const methodOverride = require('method-override');
+const sassMiddleware = require('node-sass-middleware');
 const mongoose = require('mongoose');
 const passport = require('passport');
 const nodemailer = require('nodemailer');
@@ -132,7 +132,13 @@ app.use(session({
 }));
 
 // Setting up automaticc LESS compilation to plain CSS
-app.use(lessMiddleware(path.join(__dirname, 'public')));
+app.use(sassMiddleware({
+  src: path.join(__dirname, 'public'),
+  dest: path.join(__dirname, 'public'),
+  indentedSyntax: false, // true = .sass and false = .scss
+  sourceMap: true
+}));
+
 // Setting up the favicon.
 // uncomment after placing your favicon in /public.
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
@@ -145,10 +151,11 @@ app.use('/javascripts', express.static(__dirname + '/node_modules/jquery/dist'))
 app.use('/javascripts', express.static(__dirname + '/node_modules/popper.js/dist')); // Redirect Popper.js
 app.use('/javascripts', express.static(__dirname + '/node_modules/bootstrap/dist/js')); // Redirect Bootstrap JavaScript
 // Setting up access to some CSS libraries placed under node_modules.
-app.use('/stylesheets', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/css'))); // Redirect Bootstrap CSS
-app.use('/stylesheets', express.static(path.join(__dirname, 'node_modules/font-awesome'))); // Redirect Font Awesome CSS
+//app.use('/stylesheets', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/css'))); // Redirect Bootstrap CSS
 // Setting direct access access to the public folder.
 app.use(express.static(path.join(__dirname, 'public')));
+// TODO: Remove this in production.
+app.use(express.static(path.join(__dirname, '.')));
 
 app.locals.email = new EmailTemplate({
   views: {

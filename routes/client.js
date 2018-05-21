@@ -9,9 +9,21 @@ router.get('/',
     authUtils.ensureLoggedIn,
     clientController.index);
 
+router.get('/new',
+    authUtils.ensureLoggedIn,
+    clientController.create_form);
+
+router.post('/',
+    authUtils.ensureLoggedIn,
+    clientController.create);
+
 router.get('/:clientId',
     authUtils.ensureLoggedIn,
-    clientController.show);
+    clientController.retrieve);
+
+router.put('/:clientId',
+    authUtils.ensureLoggedIn,
+    clientController.update);
 
 router.delete('/:clientId',
     authUtils.ensureLoggedIn,

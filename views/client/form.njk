@@ -1,0 +1,23 @@
+{% extends "layout.njk" %}
+{% block body %}
+<h1>{{ title }}</h1>
+<form action="{{ action }}" method="POST">
+  <div class="form-group">
+    <label for="clientName">Client Name</label>
+    <input type="text" class="form-control" id="clientName" name="name" placeholder="Enter a descriptive name for your client" value="{{ client.name }}">
+  </div>
+  <div class="form-group">
+    <label for="clientId">Client ID</label>
+    <input type="text" class="form-control" id="clientId" name="id" placeholder="Enter a unique ID for your client" value="{{ client.id }}">
+  </div>
+  <div class="form-group">
+    <label for="clientSecret">Secret</label>
+    <input type="text" class="form-control" id="clientSecret" name="secret" placeholder="Enter a strong secret" value="{{ client.secret }}">
+  </div>
+  <div class="form-group">
+    <label for="clientRedirectUri">Redirect URI</label>
+    <input type="text" class="form-control" id="clientRedirectUri" name="redirectUri" placeholder="Enter the redirect URI" value="{{ client.redirectUri }}">
+  </div>
+  <button type="submit" class="btn btn-primary">Save</button>
+</form>
+{% endblock %}
