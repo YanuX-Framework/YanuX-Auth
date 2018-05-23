@@ -14,8 +14,9 @@ fontawesome.library.add(solid);
 fontawesome.library.add(regular);
 fontawesome.library.add(brands);
 
-window.$ = $;
-window.jQuery = jQuery;
+/** Just making $ and jQuery externally available for debug puporses. */
+//window.$ = $;
+//window.jQuery = jQuery;
 
 function update() {
     $('.secret').each(function () {
@@ -28,17 +29,20 @@ function update() {
         $(this).text(text);
     });
     function hideText(text) {
-        return '*'.repeat(text.length);
+        return '\u25CF'.repeat(text.length);
     }
 }
 
-$('.secret-hide-toggle').click(function () {
-    if ($(this).siblings('.secret').data('hide')) {
-        $(this).siblings('.secret').data('hide', false);
-    } else {
-        $(this).siblings('.secret').data('hide', true);
-    }
+function init() {
+    $('.secret-hide-toggle').click(function () {
+        if ($(this).siblings('.secret').data('hide')) {
+            $(this).siblings('.secret').data('hide', false);
+        } else {
+            $(this).siblings('.secret').data('hide', true);
+        }
+        update();
+    });
     update();
-});
+}
 
-update();
+init();
