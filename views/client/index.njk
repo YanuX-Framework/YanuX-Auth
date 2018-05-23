@@ -17,7 +17,10 @@
                 <tr>
                     <td>{{ client.name }}</td>
                     <td>{{ client.id }}</td>
-                    <td>{{ client.secret }}</td>
+                    <td>
+                        <button type="button" class="secret-hide-toggle btn btn-primary"><i class="fas fa-key"></i></button>
+                        <span class="secret" data-secret="{{ client.secret }}" data-hide="true"></span>
+                    </td>
                     <td>
                         <a href="{{ client.redirectUri }}">
                             {{ client.redirectUri }}

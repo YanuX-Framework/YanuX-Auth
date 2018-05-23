@@ -91,6 +91,7 @@ const path = require('path');
 const favicon = require('serve-favicon');
 const methodOverride = require('method-override');
 const sassMiddleware = require('node-sass-middleware');
+const sassTildeImporter = require('node-sass-tilde-importer');
 const mongoose = require('mongoose');
 const passport = require('passport');
 const nodemailer = require('nodemailer');
@@ -135,6 +136,7 @@ app.use(session({
 app.use(sassMiddleware({
   src: path.join(__dirname, 'public'),
   dest: path.join(__dirname, 'public'),
+  importer: sassTildeImporter,
   indentedSyntax: false, // true = .sass and false = .scss
   sourceMap: true
 }));

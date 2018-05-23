@@ -5,8 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>YanuX - {{title}}</title>
-    <!-- TODO: Remove the following link to the pre-built and minified Bootstrap CSS -->
-    <!-- <link rel="stylesheet" href="/stylesheets/bootstrap.min.css" /> -->
     <link rel="stylesheet" href="/stylesheets/style.css" />
   </head>
   <body>
@@ -17,8 +15,7 @@
           {% endblock %}
       </div>
     </main>
-    <script src="/javascripts/jquery.min.js"></script>
-    <script src="/javascripts/bootstrap.bundle.min.js"></script>
+    <script src="/javascripts/dist/bundle.js"></script>
     <!-- TODO: Replace Font Awesome CDN with local version. Either by using a ZIP distribution package,
                or by adding Webpack into the project's build workflow. 
                If I do the latter, I can also just bundle jQuery and Bootstrap JavaScript. -->
