@@ -1,0 +1,35 @@
+{
+    "database": {
+        "host": "localhost",
+        "database": "yanux-auth"
+    },
+    "email": {
+        "from": "m5563id2xqb67hyl@ethereal.email",
+        "authentication": {
+            "username": "m5563id2xqb67hyl@ethereal.email",
+            "password": "WUvwvsEg9Q3cER5pMT"
+        },
+        "smtp": {
+            "host": "smtp.ethereal.email",
+            "port": 587,
+            "security": "STARTTLS"
+        },
+        "imap": {
+            "host": "imap.ethereal.email",
+            "port": 993,
+            "security": "TLS"
+        },
+        "pop": {
+            "host": "pop3.ethereal.email",
+            "port": 995,
+            "security": "TLS"
+        }
+    },
+    "cookie": {
+        "secret": "efX4U4RtG1D0by7vWls6l5mYfAfpY4KKkGrWqIs1"
+    },
+    "keys": {
+        "private_key_path": "private_key.pem",
+        "public_key_path": "public_key.pem"
+    }
+}

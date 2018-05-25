@@ -27,8 +27,14 @@
 // -----------------------------------------------------------------------------
 // https://jwt.io/
 // https://auth0.com/learn/json-web-tokens/
+// https://auth0.com/docs/tokens/access-token
+// https://www.npmjs.com/package/jsonwebtoken
 // https://github.com/auth0/node-jsonwebtoken
+// https://www.npmjs.com/package/passport-jwt
+// https://bshaffer.github.io/oauth2-server-php-docs/overview/jwt-access-tokens/
 // https://zapier.com/engineering/apikey-oauth-jwt/
+// https://nordicapis.com/why-cant-i-just-send-jwts-without-oauth/
+// https://auth0.com/blog/blacklist-json-web-token-api-keys/
 // NOTE: In fact, I may also extend OAuth 2 support to JWT:
 // https://tools.ietf.org/html/rfc7523
 // https://github.com/xtuple/passport-oauth2-jwt-bearer
@@ -80,6 +86,7 @@
 // http://scottksmith.com/blog/2014/07/02/beer-locker-building-a-restful-api-with-node-oauth2-server/
 // https://www.digitalocean.com/community/tutorials/an-introduction-to-oauth-2
 
+const fs = require('fs');
 const express = require('express');
 const morgan = require('morgan');
 const cons = require('consolidate');
@@ -103,9 +110,14 @@ const clientPasswordStrategy = require('./utils/clientpasswordstrategy');
 const httpBearerStrategy = require('./utils/httpbearerstrategy');
 const rememberMeStrategy = require('./utils/remembermestrategy');
 
-// TODO: I should probably store the session/secret somewhere safe and only load it into memory when needed.
-const secret = 'efX4U4RtG1D0by7vWls6l5mYfAfpY4KKkGrWqIs1';
+// Reading the config into memory.
+const config = JSON.parse(fs.readFileSync('config.json', 'utf8'));
+config.keys.private_key = fs.readFileSync(config.keys.private_key_path);
+config.keys.public_key = fs.readFileSync(config.keys.private_key_path);
+
+// Initializing the Express app.
 const app = express();
+app.set('config', config);
 
 // Setting up the logger.
 app.use(morgan('dev', {
@@ -123,6 +135,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 // Defining a string that will be used to encode and decode cookies.
+const secret = config.cookie.secret;
 app.use(cookieParser(secret));
 app.use(flash());
 // Setting up the session 
@@ -170,23 +183,24 @@ app.locals.email = new EmailTemplate({
     }
   },
   message: {
-    from: 'm5563id2xqb67hyl@ethereal.email'
+    from: config.email.from
   },
   send: true,
   preview: false,
   transport: nodemailer.createTransport({
-    host: 'smtp.ethereal.email',
-    port: 587,
+    host: config.email.smtp.host,
+    port: config.email.smtp.port,
+    security: config.email.smtp.security === "TLS",
     auth: {
-      user: 'm5563id2xqb67hyl@ethereal.email',
-      pass: 'WUvwvsEg9Q3cER5pMT'
+      user: config.email.authentication.username,
+      pass: config.email.authentication.password
     }
   })
 });
 
 // Setting up the database connection.
 mongoose.Promise = global.Promise;
-mongoose.connect('mongodb://localhost/yanux-auth')
+mongoose.connect('mongodb://' + config.database.host + '/' + config.database.database)
   .then(() => {
     logger.debug('MongoDB Connection Succesful');
   }).catch((error) => {
@@ -256,7 +270,7 @@ app.use(function (err, req, res, next) {
     'application/json': function () {
       res.set('Content-Type', 'application/json');
       res.json({
-        messageType: "error",
+        messageType: 'error',
         status: err.status,
         message: err.message,
         stack: err.stack
@@ -264,9 +278,9 @@ app.use(function (err, req, res, next) {
     },
     'default': function () {
       res.set('Content-Type', 'text/plain');
-      res.send("Error Status: " + err.status
-        + " Message: " + err.message
-        + " Stack: " + err.stack);
+      res.send('Error Status: ' + err.status
+        + ' Message: ' + err.message
+        + ' Stack: ' + err.stack);
     }
   });
 });

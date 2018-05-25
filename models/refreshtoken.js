@@ -25,7 +25,7 @@ RefreshTokenSchema.statics.hashToken = function (plainToken) {
 };
 
 RefreshTokenSchema.virtual('tokenHash').set(function (plainToken) {
-    this.code = this.constructor.hashToken(plainToken);
+    this.token = this.constructor.hashToken(plainToken);
 });
 
 RefreshTokenSchema.pre('validate', function (next) {
