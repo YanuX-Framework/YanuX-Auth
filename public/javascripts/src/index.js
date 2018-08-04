@@ -5,14 +5,13 @@ import jQuery from "jquery";
 import 'bootstrap';
 
 //Font Awesome
-import fontawesome from '@fortawesome/fontawesome'
-import solid from '@fortawesome/fontawesome-free-solid'
-import regular from '@fortawesome/fontawesome-free-regular'
-import brands from '@fortawesome/fontawesome-free-brands'
-//Add Solid, Regular and Brands Icons
-fontawesome.library.add(solid);
-fontawesome.library.add(regular);
-fontawesome.library.add(brands);
+import { library, dom } from '@fortawesome/fontawesome-svg-core';
+import { fas } from '@fortawesome/free-solid-svg-icons';
+import { far } from '@fortawesome/free-regular-svg-icons';
+import { fab } from '@fortawesome/free-brands-svg-icons';
+
+library.add(fas, far, fab);
+dom.watch();
 
 /** Just making $ and jQuery externally available for debug puporses. */
 //window.$ = $;
