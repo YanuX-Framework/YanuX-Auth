@@ -1,7 +1,8 @@
 {
     "database": {
         "host": "localhost",
-        "database": "yanux-auth"
+        "database": "yanux-auth",
+        "port": 27017
     },
     "email": {
         "from": "m5563id2xqb67hyl@ethereal.email",

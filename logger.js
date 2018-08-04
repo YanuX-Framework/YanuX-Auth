@@ -1,24 +1,23 @@
 'use strict';
 
-const winston = require("winston");
+const winston = require('winston');
+const stream = require('stream');
 const level = process.env.LOG_LEVEL || 'debug';
 
-const logger = new winston.Logger({
-    transports: [
-        new winston.transports.Console({
-            level: level,
-            timestamp: function () {
-                return (new Date()).toISOString();
-            }
-        })
-    ],
+const logger = winston.createLogger({
+    level: level,
+    format: winston.format.combine(
+        winston.format.timestamp(),
+        winston.format.printf(info => `${info.timestamp} [${info.level}]: ${info.message}`)
+    ),
+    transports: [new winston.transports.Console({})],
     exitOnError: false
 });
-
-logger.stream = {
-    write: function (message, encoding) {
-        logger.info(message);
-    }
+    
+logger.writableStream = new stream.Writable();
+logger.writableStream._write = function (chunk, encoding, next) {
+    logger.info(chunk.toString());
+    next();
 };
 
 module.exports = logger

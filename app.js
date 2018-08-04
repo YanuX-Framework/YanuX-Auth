@@ -121,7 +121,7 @@ app.set('config', config);
 
 // Setting up the logger.
 app.use(morgan('dev', {
-  stream: logger.stream
+  stream: logger.writableStream
 }));
 
 // Setting up nunjucks as the view engine for the express application using consolidate.
@@ -200,7 +200,7 @@ app.locals.email = new EmailTemplate({
 
 // Setting up the database connection.
 mongoose.Promise = global.Promise;
-mongoose.connect('mongodb://' + config.database.host + '/' + config.database.database)
+mongoose.connect('mongodb://' + config.database.host + ':' + config.database.port + '/' + config.database.database, { useNewUrlParser: true })
   .then(() => {
     logger.debug('MongoDB Connection Succesful');
   }).catch((error) => {

@@ -146,7 +146,7 @@ exports.reset_password = function (req, res, next) {
             if (!user) {
                 throw new Error('The e-mail address you provided is not registered.');
             } else {
-                reset_password_url += '/email/' + user.email + '/token/' + user.generateResetPasswordToken();
+                reset_password_url += '/email/' + user.email + '/token/' +  encodeURIComponent(user.generateResetPasswordToken());
                 return user.save();
             }
         }).then(() => req.app.locals.email.send({
