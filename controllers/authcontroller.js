@@ -36,8 +36,8 @@ exports.login = function (req, res, next) {
         if (req.body.remember_me) {
             let rmtoken = new RememberMeToken({ user: req.user });
             let plainToken = rmtoken.generateToken();
-            rmtoken.save().then(rmtoken => {
-                let cookie = { email: req.user.email, token: plainToken }
+            rmtoken.save().then(() => {
+                let cookie = { email: req.user.email, token: plainToken };
                 res.cookie('remember_me', cookie, RememberMeStrategy.cookieOptions);
                 res.redirect(req.session.returnTo ? req.session.returnTo : '/');
             });
