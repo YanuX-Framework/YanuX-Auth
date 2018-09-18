@@ -55,20 +55,26 @@ exports.create = function (req, res, next) {
 
 exports.retrieve = function (req, res, next) {
     Client.findOne({ _id: req.params.clientId, user: req.user }).then(client => {
-        res.format({
-            'text/html': function () {
-                res.render('client/form', {
-                    title: 'Client',
-                    user: req.user,
-                    error: req.flash('error'),
-                    action: "/client/" + req.params.clientId + "?_method=PUT",
-                    client: client
-                });
-            },
-            'application/json': function () {
-                res.json(client);
-            },
-        });
+        if (!client) {
+            let err = new Error('Not Found');
+            err.status = 404;
+            next(err);
+        } else {
+            res.format({
+                'text/html': function () {
+                    res.render('client/form', {
+                        title: 'Client',
+                        user: req.user,
+                        error: req.flash('error'),
+                        action: "/client/" + req.params.clientId + "?_method=PUT",
+                        client: client
+                    });
+                },
+                'application/json': function () {
+                    res.json(client);
+                },
+            });
+        }
     }).catch(err => next(err));
 };
 
@@ -80,18 +86,24 @@ exports.update = function (req, res, next) {
         redirectUri: req.body.redirectUri,
         user: req.user
     }, { runValidators: true }).then(result => {
-        res.format({
-            'text/html': function () {
-                res.redirect('/client');
-            },
-            'application/json': function () {
-                res.json({
-                    result: result,
-                    message: "Client Successfully Updated",
-                    status: "success"
-                });
-            },
-        });
+        if (result.n === 0) {
+            let err = new Error('Not Found');
+            err.status = 404;
+            next(err);
+        } else {
+            res.format({
+                'text/html': function () {
+                    res.redirect('/client');
+                },
+                'application/json': function () {
+                    res.json({
+                        result: result,
+                        message: "Client Successfully Updated",
+                        status: "success"
+                    });
+                },
+            });
+        }
     }).catch(err => next(err));
 };
 
@@ -100,17 +112,23 @@ exports.delete = function (req, res, next) {
         _id: req.params.clientId,
         user: req.user
     }).then(result => {
-        res.format({
-            'text/html': function () {
-                res.redirect('/client');
-            },
-            'application/json': function () {
-                res.json({
-                    result: result,
-                    message: "Client Successfully Deleted",
-                    status: "success"
-                });
-            },
-        });
+        if (result.n === 0) {
+            let err = new Error('Not Found');
+            err.status = 404;
+            next(err);
+        } else {
+            res.format({
+                'text/html': function () {
+                    res.redirect('/client');
+                },
+                'application/json': function () {
+                    res.json({
+                        result: result,
+                        message: "Client Successfully Deleted",
+                        status: "success"
+                    });
+                },
+            });
+        }
     }).catch(err => next(err));
 };

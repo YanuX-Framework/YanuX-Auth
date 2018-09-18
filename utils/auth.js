@@ -9,8 +9,8 @@ const authenticateCallback = function (req, res, next) {
         if (err) {
             return next(err);
         } else if (!user) {
-            let error = new Error('Unauthorized')
-            error.status = 401;
+            let err = new Error('Unauthorized')
+            err.status = 401;
             return next(err)
         } else {
             req.logIn(user, function (err) {

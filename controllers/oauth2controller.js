@@ -62,6 +62,8 @@ const OAuth2ServerAuthorization = [
 /**
  * Implicit Grant
  * https://github.com/jaredhanson/oauth2orize/blob/master/lib/grant/token.js
+ * TODO:
+ * - Implement 
  */
 OAuth2Server.grant(oauth2orize.grant.token(function (client, user, ares, callback) {
     let accessTokenUid = AccessToken.tokenUid();
@@ -96,6 +98,14 @@ OAuth2Server.grant(oauth2orize.grant.code(function (client, redirectUri, user, a
             .catch(err => callback(err));
     }
 }));
+
+/**
+ * Proof Key for Code Exchange by OAuth Public Clients
+ * - https://tools.ietf.org/html/rfc7636
+ * Implemented thanks to the "oauth2orize-pkce" package.
+ * TODO: Test this PKCE implementation.
+ */
+OAuth2Server.grant(require('oauth2orize-pkce').extensions());
 
 /**
  * Authorization Code Exchange
