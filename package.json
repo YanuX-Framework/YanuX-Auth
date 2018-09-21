@@ -3,6 +3,12 @@
   "version": "1.0.0",
   "repository": "github:YanuX-Framework/YanuX-Auth",
   "private": true,
+  "author": {
+    "name": "Pedro Albuquerque Santos",
+    "email": "pedro@albuquerques.net",
+    "url": "https://pedro.albuquerques.net"
+  },
+  "license": "AGPL-3.0",
   "scripts": {
     "build": "npx webpack",
     "serve": "node ./bin/www",
@@ -30,7 +36,7 @@
     "jquery": "^3.3.1",
     "jsonwebtoken": "^8.3.0",
     "method-override": "^3.0.0",
-    "mongoose": "^5.2.16",
+    "mongoose": "^5.2.17",
     "morgan": "^1.9.1",
     "node-sass-middleware": "^0.11.0",
     "node-sass-tilde-importer": "^1.0.2",
