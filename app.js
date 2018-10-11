@@ -204,7 +204,7 @@ mongoose.connect('mongodb://' + config.database.host + ':' + config.database.por
   .then(() => {
     logger.debug('MongoDB Connection Succesful');
   }).catch((error) => {
-    logger.debug(error);
+    logger.error(error);
     process.exit(1);
   });
 
