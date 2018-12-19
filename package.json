@@ -36,12 +36,12 @@
     "jquery": "^3.3.1",
     "jsonwebtoken": "^8.4.0",
     "method-override": "^3.0.0",
-    "mongoose": "^5.3.16",
+    "mongoose": "^5.4.0",
     "morgan": "^1.9.1",
     "node-sass-middleware": "^0.11.0",
     "node-sass-tilde-importer": "^1.0.2",
     "nodemailer": "^4.7.0",
-    "nunjucks": "^3.1.4",
+    "nunjucks": "^3.1.6",
     "oauth2orize": "^1.11.0",
     "oauth2orize-pkce": "^0.1.2",
     "passport": "^0.4.0",
@@ -58,10 +58,10 @@
     "winston": "^3.1.0"
   },
   "devDependencies": {
-    "ajv": "^6.6.1",
-    "nodemon": "^1.18.8",
+    "ajv": "^6.6.2",
+    "nodemon": "^1.18.9",
     "npm-run-all": "^4.1.5",
-    "webpack": "^4.27.1",
+    "webpack": "^4.28.0",
     "webpack-cli": "^3.1.2"
   }
 }
