@@ -18,11 +18,11 @@
     "watch:server": "npx nodemon ./bin/www"
   },
   "dependencies": {
-    "@fortawesome/fontawesome-free": "^5.8.2",
-    "@fortawesome/fontawesome-svg-core": "^1.2.18",
-    "@fortawesome/free-brands-svg-icons": "^5.8.2",
-    "@fortawesome/free-regular-svg-icons": "^5.8.2",
-    "@fortawesome/free-solid-svg-icons": "^5.8.2",
+    "@fortawesome/fontawesome-free": "^5.9.0",
+    "@fortawesome/fontawesome-svg-core": "^1.2.19",
+    "@fortawesome/free-brands-svg-icons": "^5.9.0",
+    "@fortawesome/free-regular-svg-icons": "^5.9.0",
+    "@fortawesome/free-solid-svg-icons": "^5.9.0",
     "body-parser": "^1.19.0",
     "bootstrap": "^4.3.1",
     "connect-ensure-login": "^0.1.1",
@@ -37,7 +37,7 @@
     "jquery": "^3.4.1",
     "jsonwebtoken": "^8.5.1",
     "method-override": "^3.0.0",
-    "mongoose": "^5.5.12",
+    "mongoose": "^5.5.13",
     "morgan": "^1.9.1",
     "node-sass-middleware": "^0.11.0",
     "node-sass-tilde-importer": "^1.0.2",
@@ -62,7 +62,7 @@
     "ajv": "^6.10.0",
     "nodemon": "^1.19.1",
     "npm-run-all": "^4.1.5",
-    "webpack": "^4.32.2",
+    "webpack": "^4.33.0",
     "webpack-cli": "^3.3.2"
   }
 }
