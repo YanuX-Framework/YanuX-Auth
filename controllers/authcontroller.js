@@ -10,10 +10,10 @@
 // -----------------------------------------------------------------------------
 const passport = require('passport');
 const crypto = require('crypto');
-const { check, validationResult } = require('express-validator/check');
+const { check, validationResult } = require('express-validator');
 // -----------------------------------------------------------------------------
 // TODO: Perhaps remove this require since it's not currently needed!
-// var { matchedData, sanitize } = require('express-validator/filter');
+// var { matchedData, sanitize } = require('express-validator');
 // -----------------------------------------------------------------------------
 const User = require('../models/user');
 const RememberMeToken = require('../models/remembermetoken');
