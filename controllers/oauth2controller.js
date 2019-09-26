@@ -1,7 +1,15 @@
+// TODO:
+// - Integrate OAuth 2.0 Device Flow for Browserless and Input Constrained Devices (https://tools.ietf.org/html/draft-ietf-oauth-device-flow-07):
+//   * https://www.npmjs.com/package/oauth2orize-device-code
+//   * https://github.com/jaredhanson/oauth2orize-device-code
+// - Integrate OpenID Connect (https://openid.net/connect/):
+//   * https://www.npmjs.com/package/oauth2orize-openid
+//   * https://github.com/jaredhanson/oauth2orize-openid
+//   * https://github.com/awais786327/oauth2orize-openid-examples
+
 'use strict';
 
 const oauth2orize = require('oauth2orize');
-const cryptoUtils = require('../utils/crypto');
 const User = require('../models/user');
 const Client = require('../models/client');
 const AccessToken = require('../models/accesstoken');

@@ -10,3 +10,11 @@ exports.verifyOAuth2 = function (req, res, next) {
         }
     });
 }
+
+// TODO:
+// - Implement token introspection endpoint:
+//   * https://www.oauth.com/oauth2-servers/token-introspection-endpoint/
+//   * https://tools.ietf.org/html/rfc7662
+// -----------------------------------------------------------------------------
+// exports.oauth2Introspection = function (req, res, next) {
+// }
