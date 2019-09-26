@@ -45,4 +45,4 @@ module.exports.ensureHttpAuthenticated = passport.authenticate(['basic', 'bearer
 module.exports.ensureClientHttpBasicAuth = passport.authenticate('client-basic', { session: false });
 
 // Client Authentication
-module.exports.ensureClientAuth = passport.authenticate(['client-basic', 'oauth2-client-password'], { session: false });
+module.exports.ensureClientAuth = passport.authenticate(['client-basic', 'oauth2-client-password', 'oauth2-client-pkce'], { session: false });

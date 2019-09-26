@@ -82,7 +82,7 @@ OAuth2Server.grant(oauth2orize.grant.token(function (client, user, ares, callbac
  * Authorization Code Grant
  * https://github.com/jaredhanson/oauth2orize/blob/master/lib/grant/code.js
  */
-OAuth2Server.grant(oauth2orize.grant.code(function (client, redirectUri, user, ares, callback) {
+OAuth2Server.grant(oauth2orize.grant.code(function (client, redirectUri, user, ares, req, callback) {
     if (redirectUri && client.redirectUri !== redirectUri) {
         callback(new OAuth2InvalidRedirectURIError());
     } else {
@@ -92,7 +92,9 @@ OAuth2Server.grant(oauth2orize.grant.code(function (client, redirectUri, user, a
             user: user._id,
             codeHash: authorizationCodeUid,
             redirectUri: redirectUri,
-            scope: ares.scope ? ares.scope : null
+            scope: ares.scope ? ares.scope : null,
+            codeChallenge: req.codeChallenge,
+            codeChallengeMethod: req.codeChallengeMethod
         }).save()
             .then(code => callback(null, authorizationCodeUid))
             .catch(err => callback(err));

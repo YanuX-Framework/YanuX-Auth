@@ -12,6 +12,8 @@ var AuthorizationCodeSchema = new mongoose.Schema({
     code: { type: String, required: true },
     redirectUri: { type: String, required: true },
     scope: { type: String, required: false },
+    codeChallenge: { type: String, required: false },
+    codeChallengeMethod: { type: String, required: false },
     expirationDate: { type: Date, required: true }
 });
 
@@ -30,7 +32,11 @@ AuthorizationCodeSchema.virtual('codeHash').set(function (plainCode) {
 AuthorizationCodeSchema.pre('validate', function (next) {
     if (!this.expirationDate) {
         this.expirationDate = new Date(new Date().getTime() + maxAuthorizationCodeAge);
-    } next();
+    }
+    if(this.codeChallenge && !this.codeChallengeMethod) {
+        this.codeChallengeMethod = 'plain';
+    }
+    next();
 });
 
 // Export the Mongoose model

@@ -109,6 +109,7 @@ const clientHttpBasicStrategy = require('./utils/clienthttpbasicstrategy');
 const clientPasswordStrategy = require('./utils/clientpasswordstrategy');
 const httpBearerStrategy = require('./utils/httpbearerstrategy');
 const rememberMeStrategy = require('./utils/remembermestrategy');
+const oauth2ClientPkceStrategy = require('./utils/oauth2clientpkcestrategy');
 
 // Reading the config into memory.
 const config = JSON.parse(fs.readFileSync('config.json', 'utf8'));
@@ -232,6 +233,8 @@ passport.use(httpBearerStrategy);
 // Setting up Token-based Remember Me Authentication
 passport.use(rememberMeStrategy);
 app.use(passport.authenticate('remember-me'));
+
+passport.use('oauth2-client-pkce', oauth2ClientPkceStrategy);
 
 // Setting up routes
 const index = require('./routes/index');
