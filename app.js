@@ -201,7 +201,11 @@ app.locals.email = new EmailTemplate({
 
 // Setting up the database connection.
 mongoose.Promise = global.Promise;
-mongoose.connect('mongodb://' + config.database.host + ':' + config.database.port + '/' + config.database.database, { useNewUrlParser: true })
+mongoose.connect('mongodb://' + config.database.host + ':' + config.database.port + '/' + config.database.database, {
+  useNewUrlParser: true,
+  useCreateIndex: true,
+  useUnifiedTopology: true
+})
   .then(() => {
     logger.debug('MongoDB Connection Succesful');
   }).catch((error) => {
