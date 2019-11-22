@@ -56,12 +56,12 @@
     "popper.js": "^1.16.0",
     "serve-favicon": "^2.5.0",
     "uid2": "0.0.3",
-    "validator": "^12.0.0",
+    "validator": "^12.1.0",
     "winston": "^3.2.1"
   },
   "devDependencies": {
     "ajv": "^6.10.2",
-    "nodemon": "^2.0.0",
+    "nodemon": "^2.0.1",
     "npm-run-all": "^4.1.5",
     "webpack": "^4.41.2",
     "webpack-cli": "^3.3.10"
