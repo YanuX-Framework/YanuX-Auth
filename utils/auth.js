@@ -37,12 +37,12 @@ module.exports.ensureLoggedIn = function (req, res, next) {
 }
 
 // HTTP Authentication
-module.exports.ensureHttpBasicAuth = passport.authenticate('basic', { session: false });
-module.exports.ensureHttpBearerAuth = passport.authenticate('bearer', { session: false });
-module.exports.ensureHttpAuthenticated = passport.authenticate(['basic', 'bearer'], { session: false });
+module.exports.ensureHttpBasicAuth = passport.authenticate('basic', { session: false, failWithError: true });
+module.exports.ensureHttpBearerAuth = passport.authenticate('bearer', { session: false, failWithError: true });
+module.exports.ensureHttpAuthenticated = passport.authenticate(['basic', 'bearer'], { session: false, failWithError: true });
 
 // HTTP Client Authentication
-module.exports.ensureClientHttpBasicAuth = passport.authenticate('client-basic', { session: false });
+module.exports.ensureClientHttpBasicAuth = passport.authenticate('client-basic', { session: false, failWithError: true });
 
 // Client Authentication
-module.exports.ensureClientAuth = passport.authenticate(['client-basic', 'oauth2-client-password', 'oauth2-client-pkce'], { session: false });
+module.exports.ensureClientAuth = passport.authenticate(['client-basic', 'oauth2-client-password', 'oauth2-client-pkce'], { session: false, failWithError: true });

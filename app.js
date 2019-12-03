@@ -90,6 +90,7 @@ const fs = require('fs');
 const express = require('express');
 const morgan = require('morgan');
 const cons = require('consolidate');
+const cors = require('cors');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const session = require('express-session');
@@ -130,6 +131,9 @@ app.engine('njk', cons.nunjucks);
 // Also set .njk as the default extension for view files.
 app.set('view engine', 'njk');
 app.set('views', __dirname + '/views');
+
+//Enabling CORS
+app.use(cors());
 
 // Setting up the body and cookie parser.
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -205,13 +209,12 @@ mongoose.connect('mongodb://' + config.database.host + ':' + config.database.por
   useNewUrlParser: true,
   useCreateIndex: true,
   useUnifiedTopology: true
-})
-  .then(() => {
-    logger.debug('MongoDB Connection Succesful');
-  }).catch((error) => {
-    logger.error(error);
-    process.exit(1);
-  });
+}).then(() => {
+  logger.debug('MongoDB Connection Succesful');
+}).catch((error) => {
+  logger.error(error);
+  process.exit(1);
+});
 
 // Setting up user authentication
 app.use(passport.initialize());
