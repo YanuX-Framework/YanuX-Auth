@@ -3,7 +3,6 @@
 const passport = require('passport');
 const connectEnsureLogin = require('connect-ensure-login');
 
-
 const authenticateCallback = function (req, res, next) {
     return function (err, user, info) {
         if (err) {
@@ -45,4 +44,4 @@ module.exports.ensureHttpAuthenticated = passport.authenticate(['basic', 'bearer
 module.exports.ensureClientHttpBasicAuth = passport.authenticate('client-basic', { session: false, failWithError: true });
 
 // Client Authentication
-module.exports.ensureClientAuth = passport.authenticate(['client-basic', 'oauth2-client-password', 'oauth2-client-pkce'], { session: false, failWithError: true });
+module.exports.ensureClientAuth = passport.authenticate(['client-basic', 'oauth2-client-password', 'oauth2-client-pkce', 'oauth2-refresh-token'], { session: false, failWithError: true });
