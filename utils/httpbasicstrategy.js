@@ -10,7 +10,7 @@ module.exports = new HttpBasicStrategy(
                 if (user) {
                     user.authenticate(password)
                         .then((result, reason) => {
-                            if (result) {
+                            if (result.user) {
                                 return done(null, user);
                             } else {
                                 return done(null, false);

@@ -3,7 +3,7 @@
 const mongoose = require('mongoose');
 const cryptoUtils = require('../utils/crypto');
 const Schema = mongoose.Schema;
-const maxAuthorizationCodeAge = 1 * 24 * 60 * 60 * 1000 // 1 day;
+const maxAuthorizationCodeAge = require('../config.json').oauth2.authorization_code_expires_in;
 const uidLength = 16;
 
 var AuthorizationCodeSchema = new mongoose.Schema({
@@ -11,7 +11,7 @@ var AuthorizationCodeSchema = new mongoose.Schema({
     user: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     code: { type: String, required: true },
     redirectUri: { type: String, required: true },
-    scope: { type: String, required: false },
+    scope: { type: [String], default: [] },
     codeChallenge: { type: String, required: false },
     codeChallengeMethod: { type: String, required: false },
     expirationDate: { type: Date, required: true }
@@ -33,7 +33,7 @@ AuthorizationCodeSchema.pre('validate', function (next) {
     if (!this.expirationDate) {
         this.expirationDate = new Date(new Date().getTime() + maxAuthorizationCodeAge);
     }
-    if(this.codeChallenge && !this.codeChallengeMethod) {
+    if (this.codeChallenge && !this.codeChallengeMethod) {
         this.codeChallengeMethod = 'plain';
     }
     next();

@@ -3,7 +3,7 @@
 const mongoose = require('mongoose');
 const cryptoUtils = require('../utils/crypto');
 const Schema = mongoose.Schema;
-const maxRefreshTokenAge = 365 * 24 * 60 * 60 * 1000 // 1 year;
+const maxRefreshTokenAge = require('../config.json').oauth2.refresh_token_expires_in;
 const uidLength = 256;
 
 const RefreshTokenSchema = new mongoose.Schema({

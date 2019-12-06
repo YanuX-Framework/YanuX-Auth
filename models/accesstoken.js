@@ -3,14 +3,14 @@
 const mongoose = require('mongoose');
 const cryptoUtils = require('../utils/crypto');
 const Schema = mongoose.Schema;
-const maxAccessTokenAge = 30 * 24 * 60 * 60 * 1000 // 30 days;
+const maxAccessTokenAge = require('../config.json').oauth2.access_token_expires_in
 const uidLength = 256;
 
 const AccessTokenSchema = new mongoose.Schema({
     client: { type: Schema.Types.ObjectId, ref: 'Client', required: true },
     user: { type: Schema.Types.ObjectId, ref: 'User', required: false },
     token: { type: String, required: true },
-    scope: { type: String, required: false },
+    scope: { type: [String], default: [] },
     expirationDate: { type: Date, required: true }
 });
 

@@ -27,6 +27,18 @@
             "security": "TLS"
         }
     },
+    "authentication": {
+        "remember_me_token_expires_in": 2592000000
+    },
+    "oauth2": {
+        "authorization_code_expires_in": 86400000,
+        "access_token_expires_in": 2592000000,
+        "refresh_token_expires_in": 31536000000
+    },
+    "open_id_connect": {
+        "iss": "http://localhost:3001/",
+        "expires_in": 86400000
+    },
     "cookie": {
         "secret": "efX4U4RtG1D0by7vWls6l5mYfAfpY4KKkGrWqIs1"
     },

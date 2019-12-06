@@ -1,15 +1,19 @@
+'use strict';
+
 // TODO:
 // - Integrate OAuth 2.0 Device Flow for Browserless and Input Constrained Devices (https://tools.ietf.org/html/draft-ietf-oauth-device-flow-07):
 //   * https://www.npmjs.com/package/oauth2orize-device-code
 //   * https://github.com/jaredhanson/oauth2orize-device-code
-// - Integrate OpenID Connect (https://openid.net/connect/):
-//   * https://www.npmjs.com/package/oauth2orize-openid
-//   * https://github.com/jaredhanson/oauth2orize-openid
-//   * https://github.com/awais786327/oauth2orize-openid-examples
 
-'use strict';
-
+const fs = require('fs');
 const oauth2orize = require('oauth2orize');
+const oauth2orize_ext = require('oauth2orize-openid');
+const openIdConnectConfig = require('../config.json').open_id_connect;
+const jwt = require('jsonwebtoken');
+const keys = require('../config.json').keys;
+keys.private_key = fs.readFileSync(keys.private_key_path);
+keys.public_key = fs.readFileSync(keys.private_key_path);
+
 const User = require('../models/user');
 const Client = require('../models/client');
 const AccessToken = require('../models/accesstoken');
@@ -67,53 +71,76 @@ const OAuth2ServerAuthorization = [
         });
     }]
 
-/**
- * Implicit Grant
- * https://github.com/jaredhanson/oauth2orize/blob/master/lib/grant/token.js
- * TODO:
- * - Implement 
- */
-OAuth2Server.grant(oauth2orize.grant.token(function (client, user, ares, callback) {
+// -------------------------------------------------------------------------- //
+// ------------------------ Some Re-usable Functions ------------------------ //
+// -------------------------------------------------------------------------- //
+// Function that generates an ID Token
+const generateIdToken = (client, user, ares, req, callback) => {
+    jwt.sign({ nonce: req.nonce }, keys.private_key, {
+        algorithm: 'RS256',
+        expiresIn: openIdConnectConfig.expires_in,
+        issuer: openIdConnectConfig.iss,
+        audience: client.id,
+        subject: user._id.toString()
+    }, (err, token) => {
+        if (err) { callback(err) }
+        else { callback(null, token) }
+    })
+}
+
+// Generates and Access Token
+const generateToken = (client, user, ares, req, callback) => {
     let accessTokenUid = AccessToken.tokenUid();
     return new AccessToken({
         client: client,
         user: user,
         tokenHash: accessTokenUid,
-        scope: ares.scope ? ares.scope : null
+        scope: req.scope ? req.scope : null
     }).save().then(accessToken => {
         callback(null, accessTokenUid, null,
             { expires_in: Math.floor((accessToken.expirationDate.getTime() - new Date().getTime()) / 1000) });
     }).catch(err => callback(err));
-}));
+}
 
-/**
- * Authorization Code Grant
- * https://github.com/jaredhanson/oauth2orize/blob/master/lib/grant/code.js
- */
-OAuth2Server.grant(oauth2orize.grant.code(function (client, redirectUri, user, ares, req, callback) {
+// Generates an Authorization Code
+const generateCode = (client, redirectUri, user, ares, req, callback) => {
     if (redirectUri && client.redirectUri !== redirectUri) {
         callback(new OAuth2InvalidRedirectURIError());
     } else {
-        let authorizationCodeUid = AuthorizationCode.codeUid();
+        const authorizationCodeUid = AuthorizationCode.codeUid();
         new AuthorizationCode({
             client: client._id,
             user: user._id,
             codeHash: authorizationCodeUid,
             redirectUri: redirectUri,
-            scope: ares.scope ? ares.scope : null,
+            scope: req.scope ? req.scope : [],
             codeChallenge: req.codeChallenge,
             codeChallengeMethod: req.codeChallengeMethod
         }).save()
             .then(code => callback(null, authorizationCodeUid))
             .catch(err => callback(err));
     }
-}));
+}
+// -------------------------------------------------------------------------- //
+
+/**
+ * Implicit Grant
+ * https://github.com/jaredhanson/oauth2orize/blob/master/lib/grant/token.js
+ * TODO:
+ * - Implement 
+ */
+OAuth2Server.grant(oauth2orize.grant.token(generateToken));
+
+/**
+ * Authorization Code Grant
+ * https://github.com/jaredhanson/oauth2orize/blob/master/lib/grant/code.js
+ */
+OAuth2Server.grant(oauth2orize.grant.code(generateCode));
 
 /**
  * Proof Key for Code Exchange by OAuth Public Clients
  * - https://tools.ietf.org/html/rfc7636
  * Implemented thanks to the "oauth2orize-pkce" package.
- * TODO: Test this PKCE implementation.
  */
 OAuth2Server.grant(require('oauth2orize-pkce').extensions());
 
@@ -161,7 +188,6 @@ OAuth2Server.exchange(oauth2orize.exchange.authorizationCode(function (client, c
         }
     })
 }));
-
 
 /**
  * Refresh Token Grant
@@ -262,6 +288,24 @@ OAuth2Server.exchange(oauth2orize.exchange.password(function (client, username, 
     })
 }));
 
+
+// Register supported OpenID Connect 1.0 grant types.
+// Implicit Flow
+// id_token grant type.
+OAuth2Server.grant(oauth2orize_ext.grant.idToken(generateIdToken));
+// 'id_token token' grant type.
+OAuth2Server.grant(oauth2orize_ext.grant.idTokenToken(generateToken, generateIdToken));
+// Hybrid Flow
+// 'code id_token' grant type.
+OAuth2Server.grant(oauth2orize_ext.grant.codeIdToken(generateCode, generateIdToken));
+// 'code token' grant type.
+OAuth2Server.grant(oauth2orize_ext.grant.codeToken(generateToken, generateCode));
+// 'code id_token token' grant type.
+OAuth2Server.grant(oauth2orize_ext.grant.codeIdTokenToken(generateToken, generateCode, generateIdToken));
+
+/**
+ * Export Authorization Request Dialog
+ */
 module.exports.authorization = OAuth2ServerAuthorization;
 
 /**

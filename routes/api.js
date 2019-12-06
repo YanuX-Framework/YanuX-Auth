@@ -10,4 +10,7 @@ router.route('/verify_oauth2')
     .get(authUtils.ensureHttpAuthenticated,
         clientController.verifyOAuth2);
 
+router.route('/token_info')
+    .post(clientController.oauth2Introspection);
+
 module.exports = router;
