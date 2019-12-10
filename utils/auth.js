@@ -39,6 +39,7 @@ module.exports.ensureLoggedIn = function (req, res, next) {
 module.exports.ensureHttpBasicAuth = passport.authenticate('basic', { session: false, failWithError: true });
 module.exports.ensureHttpBearerAuth = passport.authenticate('bearer', { session: false, failWithError: true });
 module.exports.ensureHttpAuthenticated = passport.authenticate(['basic', 'bearer'], { session: false, failWithError: true });
+module.exports.ensureResourceServerHttpBasicAuth = passport.authenticate('oauth2-resource-server-http-basic-strategy', { session: false, failWithError: true });
 
 // HTTP Client Authentication
 module.exports.ensureClientHttpBasicAuth = passport.authenticate('client-basic', { session: false, failWithError: true });

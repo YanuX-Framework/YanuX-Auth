@@ -8,6 +8,12 @@
 const fs = require('fs');
 const oauth2orize = require('oauth2orize');
 const oauth2orize_ext = require('oauth2orize-openid');
+const oauth2orizeOptions = {
+    modes: {
+        fragment: require('oauth2orize/lib/response/fragment'),
+        query: require('oauth2orize/lib/response/query')
+    }
+}
 const openIdConnectConfig = require('../config.json').open_id_connect;
 const jwt = require('jsonwebtoken');
 const keys = require('../config.json').keys;
@@ -40,6 +46,18 @@ OAuth2Server.deserializeClient(function (id, callback) {
         .then(client => callback(null, client))
         .catch(err => callback(err))
 });
+
+/**
+ * oauth2orize-response-mode - Parse Request Extensions
+ */
+OAuth2Server.grant(require('oauth2orize-response-mode').extensions());
+
+/**
+ * Proof Key for Code Exchange by OAuth Public Clients
+ * - https://tools.ietf.org/html/rfc7636
+ * Implemented thanks to the "oauth2orize-pkce" package.
+ */
+OAuth2Server.grant(require('oauth2orize-pkce').extensions());
 
 /**
  * Authorization Request Dialog
@@ -76,12 +94,15 @@ const OAuth2ServerAuthorization = [
 // -------------------------------------------------------------------------- //
 // Function that generates an ID Token
 const generateIdToken = (client, user, ares, req, callback) => {
-    jwt.sign({ nonce: req.nonce }, keys.private_key, {
+    jwt.sign({
+        nonce: req.nonce,
+        email: user.email
+    }, keys.private_key, {
         algorithm: 'RS256',
         expiresIn: openIdConnectConfig.expires_in,
         issuer: openIdConnectConfig.iss,
         audience: client.id,
-        subject: user._id.toString()
+        subject: user._id.toString(),
     }, (err, token) => {
         if (err) { callback(err) }
         else { callback(null, token) }
@@ -129,20 +150,13 @@ const generateCode = (client, redirectUri, user, ares, req, callback) => {
  * TODO:
  * - Implement 
  */
-OAuth2Server.grant(oauth2orize.grant.token(generateToken));
+OAuth2Server.grant(oauth2orize.grant.token(oauth2orizeOptions, generateToken));
 
 /**
  * Authorization Code Grant
  * https://github.com/jaredhanson/oauth2orize/blob/master/lib/grant/code.js
  */
-OAuth2Server.grant(oauth2orize.grant.code(generateCode));
-
-/**
- * Proof Key for Code Exchange by OAuth Public Clients
- * - https://tools.ietf.org/html/rfc7636
- * Implemented thanks to the "oauth2orize-pkce" package.
- */
-OAuth2Server.grant(require('oauth2orize-pkce').extensions());
+OAuth2Server.grant(oauth2orize.grant.code(oauth2orizeOptions, generateCode));
 
 /**
  * Authorization Code Exchange
@@ -292,16 +306,16 @@ OAuth2Server.exchange(oauth2orize.exchange.password(function (client, username, 
 // Register supported OpenID Connect 1.0 grant types.
 // Implicit Flow
 // id_token grant type.
-OAuth2Server.grant(oauth2orize_ext.grant.idToken(generateIdToken));
+OAuth2Server.grant(oauth2orize_ext.grant.idToken(oauth2orizeOptions, generateIdToken));
 // 'id_token token' grant type.
-OAuth2Server.grant(oauth2orize_ext.grant.idTokenToken(generateToken, generateIdToken));
+OAuth2Server.grant(oauth2orize_ext.grant.idTokenToken(oauth2orizeOptions, generateToken, generateIdToken));
 // Hybrid Flow
 // 'code id_token' grant type.
-OAuth2Server.grant(oauth2orize_ext.grant.codeIdToken(generateCode, generateIdToken));
+OAuth2Server.grant(oauth2orize_ext.grant.codeIdToken(oauth2orizeOptions, generateCode, generateIdToken));
 // 'code token' grant type.
-OAuth2Server.grant(oauth2orize_ext.grant.codeToken(generateToken, generateCode));
+OAuth2Server.grant(oauth2orize_ext.grant.codeToken(oauth2orizeOptions, generateToken, generateCode));
 // 'code id_token token' grant type.
-OAuth2Server.grant(oauth2orize_ext.grant.codeIdTokenToken(generateToken, generateCode, generateIdToken));
+OAuth2Server.grant(oauth2orize_ext.grant.codeIdTokenToken(oauth2orizeOptions, generateToken, generateCode, generateIdToken));
 
 /**
  * Export Authorization Request Dialog

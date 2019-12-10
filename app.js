@@ -110,13 +110,14 @@ const clientHttpBasicStrategy = require('./utils/clienthttpbasicstrategy');
 const clientPasswordStrategy = require('./utils/clientpasswordstrategy');
 const httpBearerStrategy = require('./utils/httpbearerstrategy');
 const rememberMeStrategy = require('./utils/remembermestrategy');
+const oauth2ResourceServerHttpBasicStrategy = require('./utils/oauth2resourceserverhttpbasicstrategy');
 const oauth2ClientPkceStrategy = require('./utils/oauth2clientpkcestrategy');
 const oauth2RefreshTokenStrategy = require('./utils/refreshtokenstrategy');
 
 // Reading the config into memory.
 const config = JSON.parse(fs.readFileSync('config.json', 'utf8'));
 config.keys.private_key = fs.readFileSync(config.keys.private_key_path);
-config.keys.public_key = fs.readFileSync(config.keys.private_key_path);
+config.keys.public_key = fs.readFileSync(config.keys.public_key_path);
 
 // Initializing the Express app.
 const app = express();
@@ -242,6 +243,7 @@ passport.use(httpBearerStrategy);
 passport.use(rememberMeStrategy);
 app.use(passport.authenticate('remember-me'));
 
+passport.use('oauth2-resource-server-http-basic-strategy', oauth2ResourceServerHttpBasicStrategy);
 passport.use('oauth2-client-pkce', oauth2ClientPkceStrategy);
 passport.use('oauth2-refresh-token', oauth2RefreshTokenStrategy);
 

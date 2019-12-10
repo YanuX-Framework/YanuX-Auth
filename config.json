@@ -33,7 +33,13 @@
     "oauth2": {
         "authorization_code_expires_in": 86400000,
         "access_token_expires_in": 2592000000,
-        "refresh_token_expires_in": 31536000000
+        "refresh_token_expires_in": 31536000000,
+        "resource_server_credentials": [
+            {
+                "client_id": "yanux-broker",
+                "client_secret": "topsecret_client_secret"
+            }
+        ]
     },
     "open_id_connect": {
         "iss": "http://localhost:3001/",
