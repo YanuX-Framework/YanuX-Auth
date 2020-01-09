@@ -63,3 +63,5 @@ typings/
 # Build files
 build/
 dist/
+public/stylesheets/*.css
+public/stylesheets/*.css.map
