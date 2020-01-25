@@ -60,7 +60,7 @@
     "popper.js": "^1.16.1",
     "serve-favicon": "^2.5.0",
     "uid2": "0.0.3",
-    "validator": "^12.1.0",
+    "validator": "^12.2.0",
     "winston": "^3.2.1"
   },
   "devDependencies": {
