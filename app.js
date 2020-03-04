@@ -118,6 +118,17 @@ const oauth2RefreshTokenStrategy = require('./utils/refreshtokenstrategy');
 const config = JSON.parse(fs.readFileSync('config.json', 'utf8'));
 config.keys.private_key = fs.readFileSync(config.keys.private_key_path);
 config.keys.public_key = fs.readFileSync(config.keys.public_key_path);
+config.database.mongodb_uri = config.database.mongodb_uri | 'mongodb://' + config.database.host + ':' + config.database.port + '/' + config.database.database;
+
+const env = process.env.NODE_ENV || 'dev';
+if(env !== 'dev') {
+  config.database.mongodb_uri = process.env.DATABASE_MONGODB_URI | config.database.mongodb_uri;
+  config.email.smtp.host = process.env.EMAIL_SMTP_HOST | config.email.smtp.host;
+  config.email.smtp.port = parseInt(process.env.EMAIL_SMTP_PORT | config.email.smtp.port);
+  config.email.smtp.security = process.env.EMAIL_SMTP_SECURITY | config.email.smtp.security;
+  config.email.authentication.username = process.env.EMAIL_AUTHENTICATION_USERNAME | config.email.authentication.username;
+  config.email.authentication.password = process.env.EMAIL_AUTHENTICATION_PASSWORD | config.email.authentication.password;
+}
 
 // Initializing the Express app.
 const app = express();
@@ -190,14 +201,14 @@ app.locals.email = new EmailTemplate({
     }
   },
   message: {
-    from: config.email.from
+    from: config.email.from | process.env.EMAIL_FROM
   },
   send: true,
   preview: false,
   transport: nodemailer.createTransport({
     host: config.email.smtp.host,
     port: config.email.smtp.port,
-    security: config.email.smtp.security === "TLS",
+    security: config.email.smtp.security === 'TLS',
     auth: {
       user: config.email.authentication.username,
       pass: config.email.authentication.password
@@ -207,7 +218,7 @@ app.locals.email = new EmailTemplate({
 
 // Setting up the database connection.
 mongoose.Promise = global.Promise;
-mongoose.connect('mongodb://' + config.database.host + ':' + config.database.port + '/' + config.database.database, {
+mongoose.connect(config.database.mongodb_uri, {
   useNewUrlParser: true,
   useCreateIndex: true,
   useUnifiedTopology: true
