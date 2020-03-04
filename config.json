@@ -15,16 +15,6 @@
             "host": "smtp.ethereal.email",
             "port": 587,
             "security": "STARTTLS"
-        },
-        "imap": {
-            "host": "imap.ethereal.email",
-            "port": 993,
-            "security": "TLS"
-        },
-        "pop": {
-            "host": "pop3.ethereal.email",
-            "port": 995,
-            "security": "TLS"
         }
     },
     "authentication": {
