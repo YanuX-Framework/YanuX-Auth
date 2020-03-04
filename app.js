@@ -118,19 +118,19 @@ const oauth2RefreshTokenStrategy = require('./utils/refreshtokenstrategy');
 const config = JSON.parse(fs.readFileSync('config.json', 'utf8'));
 const env = process.env.NODE_ENV || 'dev';
 if(env !== 'dev') {
-  config.database.mongodb_uri = process.env.DATABASE_MONGODB_URI | config.database.mongodb_uri;
-  config.email.smtp.host = process.env.EMAIL_SMTP_HOST | config.email.smtp.host;
-  config.email.smtp.port = parseInt(process.env.EMAIL_SMTP_PORT | config.email.smtp.port);
-  config.email.smtp.security = process.env.EMAIL_SMTP_SECURITY | config.email.smtp.security;
-  config.email.authentication.username = process.env.EMAIL_AUTHENTICATION_USERNAME | config.email.authentication.username;
-  config.email.authentication.password = process.env.EMAIL_AUTHENTICATION_PASSWORD | config.email.authentication.password;
+  config.database.mongodb_uri = process.env.DATABASE_MONGODB_URI || config.database.mongodb_uri;
+  config.email.smtp.host = process.env.EMAIL_SMTP_HOST || config.email.smtp.host;
+  config.email.smtp.port = parseInt(process.env.EMAIL_SMTP_PORT || config.email.smtp.port);
+  config.email.smtp.security = process.env.EMAIL_SMTP_SECURITY || config.email.smtp.security;
+  config.email.authentication.username = process.env.EMAIL_AUTHENTICATION_USERNAME || config.email.authentication.username;
+  config.email.authentication.password = process.env.EMAIL_AUTHENTICATION_PASSWORD || config.email.authentication.password;
   config.keys.private_key = process.env.KEYS_PRIVATE_KEY;
   config.keys.private_key = process.env.KEYS_PUBLIC_KEY;
 }
 
 config.keys.private_key = config.keys.private_key ? config.keys.private_key: fs.readFileSync(config.keys.private_key_path);
 config.keys.public_key = config.keys.public_key ? config.keys.public_key: fs.readFileSync(config.keys.public_key_path);
-config.database.mongodb_uri = config.database.mongodb_uri | 'mongodb://' + config.database.host + ':' + config.database.port + '/' + config.database.database;
+config.database.mongodb_uri = config.database.mongodb_uri || 'mongodb://' + config.database.host + ':' + config.database.port + '/' + config.database.database;
 
 // Initializing the Express app.
 const app = express();
@@ -203,7 +203,7 @@ app.locals.email = new EmailTemplate({
     }
   },
   message: {
-    from: config.email.from | process.env.EMAIL_FROM
+    from: config.email.from
   },
   send: true,
   preview: false,

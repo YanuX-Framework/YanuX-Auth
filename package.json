@@ -12,7 +12,7 @@
   "scripts": {
     "build": "npx webpack",
     "serve": "node ./bin/www",
-    "start": "npm run build && npm run serve",
+    "start": "npm run serve",
     "watch": "npm-run-all --parallel watch:server watch:build",
     "watch:build": "npx webpack --watch",
     "watch:server": "npx nodemon ./bin/www"
