@@ -128,8 +128,8 @@ if(env !== 'dev') {
   config.keys.private_key = process.env.KEYS_PUBLIC_KEY;
 }
 
-config.keys.private_key = config.keys.private_key ? config.keys.private_key: fs.readFileSync(config.keys.private_key_path);
-config.keys.public_key = config.keys.public_key ? config.keys.public_key: fs.readFileSync(config.keys.public_key_path);
+config.keys.private_key = config.keys.private_key || fs.readFileSync(config.keys.private_key_path);
+config.keys.public_key = config.keys.public_key || fs.readFileSync(config.keys.public_key_path);
 config.database.mongodb_uri = config.database.mongodb_uri || 'mongodb://' + config.database.host + ':' + config.database.port + '/' + config.database.database;
 
 // Initializing the Express app.
