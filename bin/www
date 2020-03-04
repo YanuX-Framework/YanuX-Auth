@@ -7,7 +7,7 @@
 const app = require('../app');
 const debug = require('debug')('auth:server');
 const http = require('http');
-const zeroconf = require('../zeroconf');
+//const zeroconf = require('../zeroconf');
 
 /**
  * Get port from environment and store in Express.
@@ -29,7 +29,7 @@ server.on('listening', onListening);
 /**
  * Set up DNS-SD based zeroconf
  */
-zeroconf(app);
+//zeroconf(app);
 
 /**
  * Normalize a port into a number, string, or false.
