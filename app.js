@@ -140,8 +140,8 @@ config.email.password = process.env.EMAIL_PASSWORD || config.email.password;
 
 // Config Keys
 config.keys = config.keys || {};
-config.keys.private_key = process.env.KEYS_PRIVATE_KEY.replace(/\\n/g, '\n') || fs.readFileSync(config.keys.private_key_path);
-config.keys.public_key = process.env.KEYS_PUBLIC_KEY.replace(/\\n/g, '\n') || fs.readFileSync(config.keys.public_key_path);
+config.keys.private_key = process.env.KEYS_PRIVATE_KEY ? process.env.KEYS_PRIVATE_KEY : fs.readFileSync(keys.private_key_path);
+config.keys.public_key = process.env.KEYS_PUBLIC_KEY ? process.env.KEYS_PUBLIC_KEY : fs.readFileSync(keys.public_key_path);
 
 //Config Cookie Secret
 config.name = process.env.COOKIE_SECRET || config.cookie_secret;

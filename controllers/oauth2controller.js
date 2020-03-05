@@ -17,8 +17,8 @@ const oauth2orizeOptions = {
 const openIdConnectConfig = require('../config.json').open_id_connect;
 const jwt = require('jsonwebtoken');
 const keys = require('../config.json').keys || {};
-keys.private_key = process.env.KEYS_PRIVATE_KEY.replace(/\\n/g, '\n') || fs.readFileSync(keys.private_key_path);
-keys.public_key = process.env.KEYS_PUBLIC_KEY.replace(/\\n/g, '\n') || fs.readFileSync(keys.private_key_path);
+keys.private_key = process.env.KEYS_PRIVATE_KEY ? process.env.KEYS_PRIVATE_KEY : fs.readFileSync(keys.private_key_path);
+keys.public_key = process.env.KEYS_PUBLIC_KEY ? process.env.KEYS_PUBLIC_KEY : fs.readFileSync(keys.public_key_path);
 
 const User = require('../models/user');
 const Client = require('../models/client');
