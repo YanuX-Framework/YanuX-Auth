@@ -3,7 +3,7 @@
 const mongoose = require('mongoose');
 const cryptoUtils = require('../utils/crypto');
 const Schema = mongoose.Schema;
-const maxRememberMeTokenAge = require('../config.json').authentication.remember_me_token_expires_in;
+const maxRememberMeTokenAge = parseInt(process.env.REMEMBER_ME_TOKEN_EXPIRES_IN) || require('../config.json').remember_me_token_expires_in;
 
 const RememberMeTokenSchema = new Schema({
     user: { type: Schema.Types.ObjectId, ref: 'User', required: true },

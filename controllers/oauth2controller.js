@@ -16,9 +16,9 @@ const oauth2orizeOptions = {
 }
 const openIdConnectConfig = require('../config.json').open_id_connect;
 const jwt = require('jsonwebtoken');
-const keys = require('../config.json').keys;
-keys.private_key = fs.readFileSync(keys.private_key_path);
-keys.public_key = fs.readFileSync(keys.private_key_path);
+const keys = require('../config.json').keys || {};
+keys.private_key = process.env.KEYS_PRIVATE_KEY || fs.readFileSync(keys.private_key_path);
+keys.public_key = process.env.KEYS_PRIVATE_KEY || fs.readFileSync(keys.private_key_path);
 
 const User = require('../models/user');
 const Client = require('../models/client');
@@ -102,7 +102,7 @@ const generateIdToken = (client, user, ares, req, callback) => {
         expiresIn: openIdConnectConfig.expires_in,
         issuer: openIdConnectConfig.iss,
         audience: client.id,
-        subject: user._id.toString(),
+        subject: user._id.toString()
     }, (err, token) => {
         if (err) { callback(err) }
         else { callback(null, token) }

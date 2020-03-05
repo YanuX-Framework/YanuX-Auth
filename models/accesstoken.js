@@ -3,7 +3,7 @@
 const mongoose = require('mongoose');
 const cryptoUtils = require('../utils/crypto');
 const Schema = mongoose.Schema;
-const maxAccessTokenAge = require('../config.json').oauth2.access_token_expires_in
+const maxAccessTokenAge = parseInt(process.env.OAUTH2_ACCESS_TOKEN_EXPIRES_IN) || require('../config.json').oauth2.access_token_expires_in
 const uidLength = 256;
 
 const AccessTokenSchema = new mongoose.Schema({

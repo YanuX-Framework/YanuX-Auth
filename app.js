@@ -114,24 +114,53 @@ const oauth2ResourceServerHttpBasicStrategy = require('./utils/oauth2resourceser
 const oauth2ClientPkceStrategy = require('./utils/oauth2clientpkcestrategy');
 const oauth2RefreshTokenStrategy = require('./utils/refreshtokenstrategy');
 
-// Reading the config into memory.
-const config = JSON.parse(fs.readFileSync('config.json', 'utf8'));
-const env = process.env.NODE_ENV || 'dev';
-if(env !== 'dev') {
-  config.database.mongodb_uri = process.env.DATABASE_MONGODB_URI || config.database.mongodb_uri;
-  config.email.from = process.env.EMAIL_FROM || config.email.from;
-  config.email.smtp.host = process.env.EMAIL_SMTP_HOST || config.email.smtp.host;
-  config.email.smtp.port = parseInt(process.env.EMAIL_SMTP_PORT || config.email.smtp.port);
-  config.email.smtp.security = process.env.EMAIL_SMTP_SECURITY || config.email.smtp.security;
-  config.email.authentication.username = process.env.EMAIL_AUTHENTICATION_USERNAME || config.email.authentication.username;
-  config.email.authentication.password = process.env.EMAIL_AUTHENTICATION_PASSWORD || config.email.authentication.password;
-  config.keys.private_key = process.env.KEYS_PRIVATE_KEY;
-  config.keys.public_key = process.env.KEYS_PUBLIC_KEY;
-}
 
-config.keys.private_key = config.keys.private_key || fs.readFileSync(config.keys.private_key_path);
-config.keys.public_key = config.keys.public_key || fs.readFileSync(config.keys.public_key_path);
-config.database.mongodb_uri = config.database.mongodb_uri || 'mongodb://' + config.database.host + ':' + config.database.port + '/' + config.database.database;
+// Reading the config into memory.
+const config = {}
+try { Object.assign(config, JSON.parse(fs.readFileSync('config.json', 'utf8'))) }
+catch (e) { console.error('Couldn\'t load a config file. Trying to load a working configuration from environment variables alone.') }
+
+// Config Name
+config.name = process.env.NAME || config.name;
+
+// Config Database
+config.mongodb_uri = process.env.MONGODB_URI || config.mongodb_uri;
+
+// Config ZeroConf
+config.zeroconf = process.env.ZEROCONF === 'true' || config.zeroconf;
+
+// Config Email
+config.email = config.email || {};
+config.email.from = process.env.EMAIL_FROM || config.email.from;
+config.email.host = process.env.EMAIL_HOST || config.email.host;
+config.email.port = parseInt(process.env.EMAIL_PORT) || config.email.port;
+config.email.security = process.env.EMAIL_SECURITY || config.email.security;
+config.email.username = process.env.EMAIL_USERNAME || config.email.username;
+config.email.password = process.env.EMAIL_PASSWORD || config.email.password;
+
+// Config Keys
+config.keys = config.keys || {};
+config.keys.private_key = process.env.KEYS_PRIVATE_KEY || fs.readFileSync(config.keys.private_key_path);
+config.keys.public_key = process.env.KEYS_PUBLIC_KEY || fs.readFileSync(config.keys.public_key_path);
+
+//Config Cookie Secret
+config.name = process.env.COOKIE_SECRET || config.cookie_secret;
+
+//Config Remember Me Token Expires In
+config.remember_me_token_expires_in = parseInt(process.env.REMEMBER_ME_TOKEN_EXPIRES_IN) || config.remember_me_token_expires_in;
+
+// Config OAuth2
+config.oauth2 = config.oauth2 || {};
+config.oauth2.authorization_code_expires_in = parseInt(process.env.OAUTH2_AUTHORIZATION_CODE_EXPIRES_IN) || config.oauth2.authorization_code_expires_in;
+config.oauth2.access_token_expires_in = parseInt(process.env.OAUTH2_ACCESS_TOKEN_EXPIRES_IN) || config.oauth2.access_token_expires_in;
+config.oauth2.refresh_token_expires_in = parseInt(process.env.OAUTH2_REFRESH_TOKEN_EXPIRES_IN) || config.oauth2.refresh_token_expires_in;
+config.oauth2.resource_server_credentials = process.env.OAUTH2_RESOURCE_SERVER_CREDENTIALS ? JSON.parse(process.env.OAUTH2_RESOURCE_SERVER_CREDENTIALS) : config.oauth2.resource_server_credentials || [];
+
+
+// Config OpenID Connect
+config.open_id_connect = config.open_id_connect || {};
+config.open_id_connect.iss = process.env.OPEN_ID_CONNECT_ISS || config.open_id_connect.iss;
+config.open_id_connect.expires_in = parseInt(process.env.OPEN_ID_CONNECT_EXPIRES_IN) || config.open_id_connect.expires_in;
 
 // Initializing the Express app.
 const app = express();
@@ -156,7 +185,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 // Defining a string that will be used to encode and decode cookies.
-const secret = config.cookie.secret;
+const secret = config.cookie_secret;
 app.use(cookieParser(secret));
 app.use(flash());
 // Setting up the session 
@@ -209,19 +238,19 @@ app.locals.email = new EmailTemplate({
   send: true,
   preview: false,
   transport: nodemailer.createTransport({
-    host: config.email.smtp.host,
-    port: config.email.smtp.port,
-    security: config.email.smtp.security === 'TLS',
+    host: config.email.host,
+    port: config.email.port,
+    security: config.email.security === 'TLS',
     auth: {
-      user: config.email.authentication.username,
-      pass: config.email.authentication.password
+      user: config.email.username,
+      pass: config.email.password
     }
   })
 });
 
 // Setting up the database connection.
 mongoose.Promise = global.Promise;
-mongoose.connect(config.database.mongodb_uri, {
+mongoose.connect(config.mongodb_uri, {
   useNewUrlParser: true,
   useCreateIndex: true,
   useUnifiedTopology: true
