@@ -51,5 +51,5 @@ exports.oauth2Introspection = function (req, res, next) {
 }
 
 exports.publicKey = function (req, res) {
-    res.set('application/x-pem-file').send(req.app.get('config').keys.public_key);
+    res.set('Content-Type', 'application/x-pem-file').send(req.app.get('config').keys.public_key);
 }
