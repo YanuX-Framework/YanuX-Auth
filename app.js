@@ -140,8 +140,8 @@ config.email.password = process.env.EMAIL_PASSWORD || config.email.password;
 
 // Config Keys
 config.keys = config.keys || {};
-config.keys.private_key = process.env.KEYS_PRIVATE_KEY || fs.readFileSync(config.keys.private_key_path);
-config.keys.public_key = process.env.KEYS_PUBLIC_KEY || fs.readFileSync(config.keys.public_key_path);
+config.keys.private_key = process.env.KEYS_PRIVATE_KEY.replace(/\\n/g, '\n') || fs.readFileSync(config.keys.private_key_path);
+config.keys.public_key = process.env.KEYS_PUBLIC_KEY.replace(/\\n/g, '\n') || fs.readFileSync(config.keys.public_key_path);
 
 //Config Cookie Secret
 config.name = process.env.COOKIE_SECRET || config.cookie_secret;
@@ -155,7 +155,6 @@ config.oauth2.authorization_code_expires_in = parseInt(process.env.OAUTH2_AUTHOR
 config.oauth2.access_token_expires_in = parseInt(process.env.OAUTH2_ACCESS_TOKEN_EXPIRES_IN) || config.oauth2.access_token_expires_in;
 config.oauth2.refresh_token_expires_in = parseInt(process.env.OAUTH2_REFRESH_TOKEN_EXPIRES_IN) || config.oauth2.refresh_token_expires_in;
 config.oauth2.resource_server_credentials = process.env.OAUTH2_RESOURCE_SERVER_CREDENTIALS ? JSON.parse(process.env.OAUTH2_RESOURCE_SERVER_CREDENTIALS) : config.oauth2.resource_server_credentials || [];
-
 
 // Config OpenID Connect
 config.open_id_connect = config.open_id_connect || {};
