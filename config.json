@@ -13,8 +13,8 @@
     "cookie_secret": "efX4U4RtG1D0by7vWls6l5mYfAfpY4KKkGrWqIs1",
     "remember_me_token_expires_in": 2592000000,
     "keys": {
-        "private_key_path": "private_key.pem",
-        "public_key_path": "public_key.pem"
+        "private_key_path": "keys/private_key.pem",
+        "public_key_path": "keys/public_key.pem"
     },
     "oauth2": {
         "authorization_code_expires_in": 86400000,

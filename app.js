@@ -86,7 +86,7 @@
 // http://scottksmith.com/blog/2014/07/02/beer-locker-building-a-restful-api-with-node-oauth2-server/
 // https://www.digitalocean.com/community/tutorials/an-introduction-to-oauth-2
 
-const fs = require('fs');
+const path = require('path');
 const express = require('express');
 const morgan = require('morgan');
 const cons = require('consolidate');
@@ -95,7 +95,6 @@ const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const session = require('express-session');
 const flash = require('connect-flash');
-const path = require('path');
 //const favicon = require('serve-favicon');
 const methodOverride = require('method-override');
 const sassMiddleware = require('node-sass-middleware');
@@ -104,6 +103,7 @@ const mongoose = require('mongoose');
 const passport = require('passport');
 const nodemailer = require('nodemailer');
 const EmailTemplate = require('email-templates');
+const configure = require('./configure');
 const logger = require('./logger');
 const httpBasicStrategy = require('./utils/httpbasicstrategy');
 const clientHttpBasicStrategy = require('./utils/clienthttpbasicstrategy');
@@ -114,56 +114,9 @@ const oauth2ResourceServerHttpBasicStrategy = require('./utils/oauth2resourceser
 const oauth2ClientPkceStrategy = require('./utils/oauth2clientpkcestrategy');
 const oauth2RefreshTokenStrategy = require('./utils/refreshtokenstrategy');
 
-
-// Reading the config into memory.
-const config = {}
-try { Object.assign(config, JSON.parse(fs.readFileSync('config.json', 'utf8'))) }
-catch (e) { console.error('Couldn\'t load a config file. Trying to load a working configuration from environment variables alone.') }
-
-// Config Name
-config.name = process.env.NAME || config.name;
-
-// Config Database
-config.mongodb_uri = process.env.MONGODB_URI || config.mongodb_uri;
-
-// Config ZeroConf
-config.zeroconf = process.env.ZEROCONF === 'true' || config.zeroconf;
-
-// Config Email
-config.email = config.email || {};
-config.email.from = process.env.EMAIL_FROM || config.email.from;
-config.email.host = process.env.EMAIL_HOST || config.email.host;
-config.email.port = parseInt(process.env.EMAIL_PORT) || config.email.port;
-config.email.security = process.env.EMAIL_SECURITY || config.email.security;
-config.email.username = process.env.EMAIL_USERNAME || config.email.username;
-config.email.password = process.env.EMAIL_PASSWORD || config.email.password;
-
-// Config Keys
-config.keys = config.keys || {};
-config.keys.private_key = process.env.KEYS_PRIVATE_KEY ? process.env.KEYS_PRIVATE_KEY : fs.readFileSync(config.keys.private_key_path);
-config.keys.public_key = process.env.KEYS_PUBLIC_KEY ? process.env.KEYS_PUBLIC_KEY : fs.readFileSync(config.keys.public_key_path);
-
-//Config Cookie Secret
-config.name = process.env.COOKIE_SECRET || config.cookie_secret;
-
-//Config Remember Me Token Expires In
-config.remember_me_token_expires_in = parseInt(process.env.REMEMBER_ME_TOKEN_EXPIRES_IN) || config.remember_me_token_expires_in;
-
-// Config OAuth2
-config.oauth2 = config.oauth2 || {};
-config.oauth2.authorization_code_expires_in = parseInt(process.env.OAUTH2_AUTHORIZATION_CODE_EXPIRES_IN) || config.oauth2.authorization_code_expires_in;
-config.oauth2.access_token_expires_in = parseInt(process.env.OAUTH2_ACCESS_TOKEN_EXPIRES_IN) || config.oauth2.access_token_expires_in;
-config.oauth2.refresh_token_expires_in = parseInt(process.env.OAUTH2_REFRESH_TOKEN_EXPIRES_IN) || config.oauth2.refresh_token_expires_in;
-config.oauth2.resource_server_credentials = process.env.OAUTH2_RESOURCE_SERVER_CREDENTIALS ? JSON.parse(process.env.OAUTH2_RESOURCE_SERVER_CREDENTIALS) : config.oauth2.resource_server_credentials || [];
-
-// Config OpenID Connect
-config.open_id_connect = config.open_id_connect || {};
-config.open_id_connect.iss = process.env.OPEN_ID_CONNECT_ISS || config.open_id_connect.iss;
-config.open_id_connect.expires_in = parseInt(process.env.OPEN_ID_CONNECT_EXPIRES_IN) || config.open_id_connect.expires_in;
-
 // Initializing the Express app.
 const app = express();
-app.set('config', config);
+configure(app);
 
 // Setting up the logger.
 app.use(morgan('dev', {
@@ -184,7 +137,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 // Defining a string that will be used to encode and decode cookies.
-const secret = config.cookie_secret;
+const secret = app.get('config').cookie_secret;
 app.use(cookieParser(secret));
 app.use(flash());
 // Setting up the session 
@@ -232,24 +185,24 @@ app.locals.email = new EmailTemplate({
     }
   },
   message: {
-    from: config.email.from
+    from: app.get('config').email.from
   },
   send: true,
   preview: false,
   transport: nodemailer.createTransport({
-    host: config.email.host,
-    port: config.email.port,
-    security: config.email.security === 'TLS',
+    host: app.get('config').email.host,
+    port: app.get('config').email.port,
+    security: app.get('config').email.security === 'TLS',
     auth: {
-      user: config.email.username,
-      pass: config.email.password
+      user: app.get('config').email.username,
+      pass: app.get('config').email.password
     }
   })
 });
 
 // Setting up the database connection.
 mongoose.Promise = global.Promise;
-mongoose.connect(config.mongodb_uri, {
+mongoose.connect(app.get('config').mongodb_uri, {
   useNewUrlParser: true,
   useCreateIndex: true,
   useUnifiedTopology: true
