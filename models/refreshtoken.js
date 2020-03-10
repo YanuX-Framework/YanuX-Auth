@@ -1,9 +1,12 @@
 'use strict';
 
+const configure = require('../configure');
+const config = configure();
+const maxRefreshTokenAge = config.oauth2.refresh_token_expires_in
+
 const mongoose = require('mongoose');
 const cryptoUtils = require('../utils/crypto');
 const Schema = mongoose.Schema;
-const maxRefreshTokenAge = parseInt(process.env.OAUTH2_REFRESH_TOKEN_EXPIRES_IN) || require('../config.json').oauth2.refresh_token_expires_in;
 const uidLength = 256;
 
 const RefreshTokenSchema = new mongoose.Schema({

@@ -1,9 +1,10 @@
+'use strict';
+
 const crypto = require('crypto');
 const CustomStrategy = require('passport-custom').Strategy;
 const Client = require('../models/client');
 const AuthorizationCode = require('../models/authorizationcode');
 const base64url = require('base64url')
-
 
 module.exports = new CustomStrategy(function (req, callback) {
     const grant_type = req.body.grant_type || req.headers.grant_type;

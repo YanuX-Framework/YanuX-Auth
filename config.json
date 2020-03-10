@@ -1,5 +1,7 @@
 {
     "name": "YanuX-Auth",
+    "port": 3001,
+    "log_level": "debug",
     "mongodb_uri": "mongodb://localhost:27017/yanux-auth",
     "zeroconf": false,
     "email": {

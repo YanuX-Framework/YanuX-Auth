@@ -1,3 +1,5 @@
+'use strict';
+
 const dnssd = require('dnssd');
 
 module.exports = function (app) {

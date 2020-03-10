@@ -19,7 +19,7 @@ const User = require('../models/user');
 const RememberMeToken = require('../models/remembermetoken');
 const RememberMeStrategy = require('../utils/remembermestrategy');
 
-exports.login_form = function (req, res, next) {
+module.exports.login_form = function (req, res, next) {
     res.render('auth/login', {
         title: 'Login',
         user: req.user,
@@ -27,7 +27,7 @@ exports.login_form = function (req, res, next) {
     });
 };
 
-exports.login = function (req, res, next) {
+module.exports.login = function (req, res, next) {
     passport.authenticate('local', {
         failureRedirect: '/auth/login',
         failureFlash: true
@@ -47,7 +47,7 @@ exports.login = function (req, res, next) {
     });
 };
 
-exports.register_form = function (req, res, next) {
+module.exports.register_form = function (req, res, next) {
     res.render('auth/register', {
         title: 'Register',
         user: req.user,
@@ -61,13 +61,13 @@ let password_check = check('password', 'Your password is too short.').isLength({
 let confirm_password_check = check('confirm_password', 'You have not confirmed your password correctly.').exists()
     .custom((value, { req }) => value === req.body.password);
 
-exports.register_validation = [
+module.exports.register_validation = [
     email_check,
     password_check,
     confirm_password_check
 ];
 
-exports.register = function (req, res, next) {
+module.exports.register = function (req, res, next) {
     const errors = validationResult(req);
     for (const error of errors.array()) {
         req.flash('error', error.msg);
@@ -90,7 +90,7 @@ exports.register = function (req, res, next) {
     }
 };
 
-exports.change_password_form = function (req, res, next) {
+module.exports.change_password_form = function (req, res, next) {
     res.render('auth/change_password', {
         title: 'Change Password',
         user: req.user,
@@ -98,12 +98,12 @@ exports.change_password_form = function (req, res, next) {
     });
 };
 
-exports.change_password_validation = [
+module.exports.change_password_validation = [
     password_check,
     confirm_password_check
 ];
 
-exports.change_password = function (req, res, next) {
+module.exports.change_password = function (req, res, next) {
     const errors = validationResult(req);
     for (const error of errors.array()) {
         req.flash('error', error.msg);
@@ -122,11 +122,11 @@ exports.change_password = function (req, res, next) {
     }
 };
 
-exports.reset_password_validation = [
+module.exports.reset_password_validation = [
     email_check
 ];
 
-exports.reset_password_form = function (req, res, next) {
+module.exports.reset_password_form = function (req, res, next) {
     res.render('auth/reset_password', {
         title: 'Reset Password',
         user: req.user,
@@ -134,7 +134,7 @@ exports.reset_password_form = function (req, res, next) {
     });
 };
 
-exports.reset_password = function (req, res, next) {
+module.exports.reset_password = function (req, res, next) {
     const errors = validationResult(req);
     for (const error of errors.array()) {
         req.flash('error', error.msg);
@@ -173,7 +173,7 @@ exports.reset_password = function (req, res, next) {
     }
 };
 
-exports.reset_password_url_form = function (req, res, next) {
+module.exports.reset_password_url_form = function (req, res, next) {
     let email = req.params.email;
     let plainToken = req.params.token;
     let hashedToken = User.hashToken(plainToken);
@@ -193,12 +193,12 @@ exports.reset_password_url_form = function (req, res, next) {
         });
 };
 
-exports.reset_password_url_validation = [
+module.exports.reset_password_url_validation = [
     password_check,
     confirm_password_check
 ];
 
-exports.reset_password_url = function (req, res, next) {
+module.exports.reset_password_url = function (req, res, next) {
     const errors = validationResult(req);
     for (const error of errors.array()) {
         req.flash('error', error.msg);
@@ -231,7 +231,7 @@ exports.reset_password_url = function (req, res, next) {
     }
 };
 
-exports.logout = function (req, res, next) {
+module.exports.logout = function (req, res, next) {
     let rememberMeCookie = req.cookies['remember_me'];
     let logout = function (req, res) {
         res.clearCookie('remember_me');

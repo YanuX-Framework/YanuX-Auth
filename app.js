@@ -204,6 +204,7 @@ app.locals.email = new EmailTemplate({
 mongoose.Promise = global.Promise;
 mongoose.connect(app.get('config').mongodb_uri, {
   useNewUrlParser: true,
+  useFindAndModify: false,
   useCreateIndex: true,
   useUnifiedTopology: true
 }).then(() => {

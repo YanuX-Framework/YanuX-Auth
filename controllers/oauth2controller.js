@@ -5,6 +5,11 @@
 //   * https://www.npmjs.com/package/oauth2orize-device-code
 //   * https://github.com/jaredhanson/oauth2orize-device-code
 
+const configure = require('../configure');
+const config = configure();
+const openIdConnectConfig = config.open_id_connect;
+const keys = config.keys;
+
 const oauth2orize = require('oauth2orize');
 const oauth2orize_ext = require('oauth2orize-openid');
 const oauth2orizeOptions = {
@@ -13,11 +18,7 @@ const oauth2orizeOptions = {
         query: require('oauth2orize/lib/response/query')
     }
 }
-const openIdConnectConfig = require('../config.json').open_id_connect;
 const jwt = require('jsonwebtoken');
-const configure = require('../configure');
-const keys = configure().keys;
-
 const User = require('../models/user');
 const Client = require('../models/client');
 const AccessToken = require('../models/accesstoken');
@@ -162,7 +163,7 @@ OAuth2Server.grant(oauth2orize.grant.code(oauth2orizeOptions, generateCode));
  */
 OAuth2Server.exchange(oauth2orize.exchange.authorizationCode(function (client, code, redirectUri, callback) {
     let accessTokenUid, refreshTokenUid;
-    AuthorizationCode.findOneAndRemove({
+    AuthorizationCode.findOneAndDelete({
         client: client,
         code: AuthorizationCode.hashCode(code),
         redirectUri: redirectUri,
@@ -207,14 +208,14 @@ OAuth2Server.exchange(oauth2orize.exchange.authorizationCode(function (client, c
  */
 OAuth2Server.exchange(oauth2orize.exchange.refreshToken(function (client, refreshToken, scope, callback) {
     let accessTokenUid, refreshTokenUid;
-    RefreshToken.findOneAndRemove({
+    RefreshToken.findOneAndDelete({
         token: RefreshToken.hashToken(refreshToken),
         client: client,
         expirationDate: { $gt: new Date() }
     }).then(refToken => {
         if (refToken) {
             //NOTE: I'm invalidating all old tokens! I'm not sure if I should do it or not!
-            return AccessToken.findByIdAndRemove(refToken.accessToken);
+            return AccessToken.findByIdAndDelete(refToken.accessToken);
         } else {
             return Promise.reject(new OAuth2InvalidRefreshToken());
         }

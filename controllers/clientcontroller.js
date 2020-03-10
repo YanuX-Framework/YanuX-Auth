@@ -2,7 +2,7 @@
 
 const Client = require('../models/client');
 
-exports.index = function (req, res, next) {
+module.exports.index = function (req, res, next) {
     Client.find({ user: req.user }).then(clients => {
         res.format({
             'text/html': function () {
@@ -20,7 +20,7 @@ exports.index = function (req, res, next) {
     }).catch(err => next(err));
 };
 
-exports.create_form = function (req, res, next) {
+module.exports.create_form = function (req, res, next) {
     res.render('client/form', {
         title: 'Client',
         user: req.user,
@@ -30,7 +30,7 @@ exports.create_form = function (req, res, next) {
     });
 };
 
-exports.create = function (req, res, next) {
+module.exports.create = function (req, res, next) {
     new Client({
         name: req.body.name,
         id: req.body.id,
@@ -53,7 +53,7 @@ exports.create = function (req, res, next) {
     }).catch(err => next(err))
 };
 
-exports.retrieve = function (req, res, next) {
+module.exports.retrieve = function (req, res, next) {
     Client.findOne({ _id: req.params.clientId, user: req.user }).then(client => {
         if (!client) {
             let err = new Error('Not Found');
@@ -78,7 +78,7 @@ exports.retrieve = function (req, res, next) {
     }).catch(err => next(err));
 };
 
-exports.update = function (req, res, next) {
+module.exports.update = function (req, res, next) {
     Client.updateOne({ _id: req.params.clientId, user: req.user }, {
         name: req.body.name,
         id: req.body.id,
@@ -107,7 +107,7 @@ exports.update = function (req, res, next) {
     }).catch(err => next(err));
 };
 
-exports.delete = function (req, res, next) {
+module.exports.delete = function (req, res, next) {
     Client.deleteOne({
         _id: req.params.clientId,
         user: req.user

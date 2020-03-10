@@ -1,9 +1,12 @@
 'use strict';
 
+const configure = require('../configure');
+const config = configure();
+const maxAuthorizationCodeAge = config.oauth2.authorization_code_expires_in
+
 const mongoose = require('mongoose');
 const cryptoUtils = require('../utils/crypto');
 const Schema = mongoose.Schema;
-const maxAuthorizationCodeAge = parseInt(process.env.OAUTH2_AUTHORIZATION_CODE_EXPIRES_IN) || require('../config.json').oauth2.authorization_code_expires_in;
 const uidLength = 16;
 
 var AuthorizationCodeSchema = new mongoose.Schema({

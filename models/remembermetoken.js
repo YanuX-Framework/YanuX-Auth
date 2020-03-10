@@ -1,9 +1,12 @@
 'use strict';
 
+const configure = require('../configure');
+const config = configure();
+const maxRememberMeTokenAge = config.remember_me_token_expires_in
+
 const mongoose = require('mongoose');
 const cryptoUtils = require('../utils/crypto');
 const Schema = mongoose.Schema;
-const maxRememberMeTokenAge = parseInt(process.env.REMEMBER_ME_TOKEN_EXPIRES_IN) || require('../config.json').remember_me_token_expires_in;
 
 const RememberMeTokenSchema = new Schema({
     user: { type: Schema.Types.ObjectId, ref: 'User', required: true },
@@ -14,6 +17,7 @@ const RememberMeTokenSchema = new Schema({
 RememberMeTokenSchema.statics.MAX_REMEMBER_ME_TOKEN_AGE = maxRememberMeTokenAge;
 
 RememberMeTokenSchema.pre('validate', function (next) {
+    console.log('EXPIRATION DATE:', maxRememberMeTokenAge);
     if (!this.expirationDate) {
         this.expirationDate = new Date(new Date().getTime() + maxRememberMeTokenAge);
     }

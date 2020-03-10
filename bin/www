@@ -1,19 +1,18 @@
 #!/usr/bin/env node
+'use strict';
 
 /**
  * Module dependencies.
  */
-
 const app = require('../app');
 const debug = require('debug')('auth:server');
 const http = require('http');
 const zeroconf = require('../zeroconf');
 
 /**
- * Get port from environment and store in Express.
+ * Get port from the previously set 'config' variable.
  */
-const port = normalizePort(process.env.PORT || '3001');
-app.set('port', port);
+const port = app.get('config').port
 
 /**
  * Create HTTP server.
@@ -31,22 +30,6 @@ server.on('listening', onListening);
  */
 if (app.get('zeroconf')) {
   zeroconf(app);
-}
-
-/**
- * Normalize a port into a number, string, or false.
- */
-function normalizePort(val) {
-  const port = parseInt(val, 10);
-  if (isNaN(port)) {
-    // named pipe
-    return val;
-  }
-  if (port >= 0) {
-    // port number
-    return port;
-  }
-  return false;
 }
 
 /**

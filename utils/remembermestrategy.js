@@ -5,11 +5,11 @@
 const RememberMeStrategy = require('passport-remember-me').Strategy;
 const RememberMeToken = require('../models/remembermetoken');
 
-const rmstrategy = new RememberMeStrategy(
+const rmStrategy = new RememberMeStrategy(
     { path: '/', httpOnly: true, maxAge: RememberMeToken.MAX_REMEMBER_ME_TOKEN_AGE },
     (rmcookie, done) => {
         let hashedToken = RememberMeToken.hashToken(rmcookie.token);
-        RememberMeToken.findOneAndRemove({
+        RememberMeToken.findOneAndDelete({
             token: hashedToken,
             expirationDate: { $gt: new Date() }
         }).populate('user')
@@ -35,5 +35,5 @@ const rmstrategy = new RememberMeStrategy(
     }
 );
 
-rmstrategy.cookieOptions = rmstrategy._opts;
-module.exports = rmstrategy;
+rmStrategy.cookieOptions = rmStrategy._opts;
+module.exports = rmStrategy;

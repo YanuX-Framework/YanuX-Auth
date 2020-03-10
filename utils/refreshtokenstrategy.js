@@ -1,3 +1,5 @@
+'use strict';
+
 const CustomStrategy = require('passport-custom').Strategy;
 const Client = require('../models/client');
 const RefreshToken = require('../models/refreshtoken');

@@ -1,8 +1,11 @@
 'use strict';
 
+const configure = require('./configure');
+const config = configure();
+const level = config.log_level;
+
 const winston = require('winston');
 const stream = require('stream');
-const level = process.env.LOG_LEVEL || 'debug';
 
 const logger = winston.createLogger({
     level: level,
@@ -13,7 +16,7 @@ const logger = winston.createLogger({
     transports: [new winston.transports.Console({})],
     exitOnError: false
 });
-    
+
 logger.writableStream = new stream.Writable();
 logger.writableStream._write = function (chunk, encoding, next) {
     logger.info(chunk.toString());
