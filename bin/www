@@ -5,12 +5,9 @@
  * Module dependencies.
  */
 const app = require('../app');
+const zeroconf = require('../zeroconf');
 const debug = require('debug')('auth:server');
 const http = require('http');
-
-// --------------------- Disabled modules ---------------------
-// const zeroconf = require('../zeroconf');
-// ------------------------------------------------------------
 
 /**
  * Get port from the previously set 'config' variable.
@@ -29,16 +26,9 @@ server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);
 
-// -------------------------------------------------------------
-// Disabled zeroconf (package: dnssd)
-// -------------------------------------------------------------
-// /**
-//  * Set up DNS-SD based zeroconf
-//  */
-// if (app.get('zeroconf')) {
-//   zeroconf(app);
-// }
-// -------------------------------------------------------------
+if (app.get('zeroconf')) {
+  zeroconf(app);
+}
 
 /**
  * Event listener for HTTP server "error" event.
