@@ -14,4 +14,7 @@ router.route('/token_info').post(apiController.oauth2Introspection);
 //Serving the server's public key
 router.route('/public_key').get(apiController.publicKey);
 
+//Serving the server's JWKs
+router.route('/jwks').get(apiController.jwks);
+
 module.exports = router;

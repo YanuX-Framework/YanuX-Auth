@@ -1,16 +1,27 @@
 'use strict';
 
 const passport = require('passport');
-const jwt = require('jsonwebtoken');
+const jose = require('jose');
 const AccessToken = require('../models/accesstoken');
+const configure = require('../configure');
+const config = configure();
 
 // -----------------------------------------------------------------------------
 // - Custom Token Introspection Endpoint:
 // -----------------------------------------------------------------------------
-exports.verifyOAuth2 = function (req, res, next) {
+exports.verifyOAuth2 = function (req, res) {
     const response = req.authInfo;
-    jwt.sign(response, req.app.get('config').keys.private_key, { algorithm: 'RS256' }, (err, token) => {
-        if (err) { next(err) } else { res.json({ response: response, jwt: token }); }
+    res.json({
+        response,
+        jwt: jose.JWT.sign(response, req.app.get('config').keys.private_jwk,
+            {
+                algorithm: 'RS256',
+                expiresIn: (config.open_id_connect.expires_in / 1000) + 's',
+                issuer: config.open_id_connect.iss,
+                audience: response.client && response.client.id ? response.client.id : '',
+                subject: req.user && req.user.email ? req.user.email : '',
+                header: { jku: `${req.protocol}://${req.get('host')}/api/jwks` }
+            })
     });
 }
 
@@ -52,4 +63,8 @@ exports.oauth2Introspection = function (req, res, next) {
 
 exports.publicKey = function (req, res) {
     res.set('Content-Type', 'application/x-pem-file').send(req.app.get('config').keys.public_key);
+}
+
+exports.jwks = function (req, res) {
+    res.json(config.keys.keystore.toJWKS());
 }

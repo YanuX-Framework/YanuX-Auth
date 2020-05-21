@@ -177,26 +177,16 @@ app.use(express.static(path.join(__dirname, '.')));
 app.locals.email = new EmailTemplate({
   views: {
     root: path.join(__dirname, 'emails'),
-    options: {
-      extension: 'njk',
-      map: {
-        'njk': 'nunjucks'
-      },
-    }
+    options: { extension: 'njk', map: { 'njk': 'nunjucks' } }
   },
-  message: {
-    from: app.get('config').email.from
-  },
+  message: { from: app.get('config').email.from },
   send: true,
   preview: false,
   transport: nodemailer.createTransport({
     host: app.get('config').email.host,
     port: app.get('config').email.port,
     security: app.get('config').email.security === 'TLS',
-    auth: {
-      user: app.get('config').email.username,
-      pass: app.get('config').email.password
-    }
+    auth: { user: app.get('config').email.username, pass: app.get('config').email.password }
   })
 });
 
@@ -207,12 +197,8 @@ mongoose.connect(app.get('config').mongodb_uri, {
   useFindAndModify: false,
   useCreateIndex: true,
   useUnifiedTopology: true
-}).then(() => {
-  logger.debug('MongoDB Connection Succesful');
-}).catch((error) => {
-  logger.error(error);
-  process.exit(1);
-});
+}).then(() => { logger.debug('Connected to Database'); })
+  .catch((error) => { logger.error(error); process.exit(1); });
 
 // Setting up user authentication
 app.use(passport.initialize());
@@ -256,7 +242,6 @@ app.use('/oauth2', oauth2);
 app.use('/api', api);
 app.use('/client', client);
 
-
 //Setting up error handling
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
@@ -288,9 +273,7 @@ app.use(function (err, req, res, next) {
     },
     'default': function () {
       res.set('Content-Type', 'text/plain');
-      res.send('Error Status: ' + err.status
-        + ' Message: ' + err.message
-        + ' Stack: ' + err.stack);
+      res.send('Error Status: ' + err.status + ' Message: ' + err.message + ' Stack: ' + err.stack);
     }
   });
 });
