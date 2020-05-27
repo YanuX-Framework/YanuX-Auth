@@ -67,6 +67,9 @@ config.oauth2.resource_server_credentials = process.env.OAUTH2_RESOURCE_SERVER_C
 
 // Config OpenID Connect
 config.open_id_connect = config.open_id_connect || {};
+//NOTE: 
+//I'm also using this 'open_id_connect.iss' as the config that represents the URL where the website can be reached.
+//Perhaps I should create a dedicated config for that, or change the name of this one to something more generic.
 config.open_id_connect.iss = process.env.OPEN_ID_CONNECT_ISS || config.open_id_connect.iss;
 config.open_id_connect.expires_in = parseInt(process.env.OPEN_ID_CONNECT_EXPIRES_IN) || config.open_id_connect.expires_in;
 

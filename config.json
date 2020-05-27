@@ -30,7 +30,7 @@
         ]
     },
     "open_id_connect": {
-        "iss": "http://localhost:3001/",
+        "iss": "http://localhost:3001",
         "expires_in": 86400000
     }
 }

@@ -86,25 +86,25 @@
 // http://scottksmith.com/blog/2014/07/02/beer-locker-building-a-restful-api-with-node-oauth2-server/
 // https://www.digitalocean.com/community/tutorials/an-introduction-to-oauth-2
 
-const path = require('path');
 const express = require('express');
+const configure = require('./configure');
+const logger = require('./logger');
+const mongoose = require('mongoose');
 const morgan = require('morgan');
-const cons = require('consolidate');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const session = require('express-session');
+const MongoStore = require('connect-mongo')(session);
 const flash = require('connect-flash');
-//const favicon = require('serve-favicon');
-const methodOverride = require('method-override');
+const path = require('path');
+const favicon = require('serve-favicon');
 const sassMiddleware = require('node-sass-middleware');
 const sassTildeImporter = require('node-sass-tilde-importer');
-const mongoose = require('mongoose');
+const cons = require('consolidate');
+const methodOverride = require('method-override');
 const passport = require('passport');
-const nodemailer = require('nodemailer');
-const EmailTemplate = require('email-templates');
-const configure = require('./configure');
-const logger = require('./logger');
+const User = require('./models/user');
 const httpBasicStrategy = require('./utils/httpbasicstrategy');
 const clientHttpBasicStrategy = require('./utils/clienthttpbasicstrategy');
 const clientPasswordStrategy = require('./utils/clientpasswordstrategy');
@@ -113,82 +113,12 @@ const rememberMeStrategy = require('./utils/remembermestrategy');
 const oauth2ResourceServerHttpBasicStrategy = require('./utils/oauth2resourceserverhttpbasicstrategy');
 const oauth2ClientPkceStrategy = require('./utils/oauth2clientpkcestrategy');
 const oauth2RefreshTokenStrategy = require('./utils/refreshtokenstrategy');
+const EmailTemplate = require('email-templates');
+const nodemailer = require('nodemailer');
 
 // Initializing the Express app.
 const app = express();
 configure(app);
-
-// Setting up the logger.
-app.use(morgan('dev', {
-  stream: logger.writableStream
-}));
-
-// Setting up nunjucks as the view engine for the express application using consolidate.
-app.engine('njk', cons.nunjucks);
-// Also set .njk as the default extension for view files.
-app.set('view engine', 'njk');
-app.set('views', __dirname + '/views');
-
-//Enabling CORS
-app.use(cors());
-
-// Setting up the body and cookie parser.
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
-
-// Defining a string that will be used to encode and decode cookies.
-const secret = app.get('config').cookie_secret;
-app.use(cookieParser(secret));
-app.use(flash());
-// Setting up the session 
-app.use(session({
-  secret: secret,
-  resave: true,
-  saveUninitialized: false
-}));
-
-// Setting up automaticc LESS compilation to plain CSS
-app.use(sassMiddleware({
-  src: path.join(__dirname, 'public'),
-  dest: path.join(__dirname, 'public'),
-  importer: sassTildeImporter,
-  indentedSyntax: false, // true = .sass and false = .scss
-  sourceMap: true
-}));
-
-// Setting up the favicon.
-// uncomment after placing your favicon in /public.
-//app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
-
-//Method Override to Allow FAKE Request Methods:
-app.use(methodOverride('_method', { methods: ['GET', 'POST'] }));
-
-// Setting up access to some JavaScript libraries placed under node_modules.
-app.use('/javascripts', express.static(__dirname + '/node_modules/jquery/dist')); // Redirect jQuery
-app.use('/javascripts', express.static(__dirname + '/node_modules/popper.js/dist')); // Redirect Popper.js
-app.use('/javascripts', express.static(__dirname + '/node_modules/bootstrap/dist/js')); // Redirect Bootstrap JavaScript
-// Setting up access to some CSS libraries placed under node_modules.
-//app.use('/stylesheets', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/css'))); // Redirect Bootstrap CSS
-// Setting direct access access to the public folder.
-app.use(express.static(path.join(__dirname, 'public')));
-// TODO: Remove this in production.
-app.use(express.static(path.join(__dirname, '.')));
-
-app.locals.email = new EmailTemplate({
-  views: {
-    root: path.join(__dirname, 'emails'),
-    options: { extension: 'njk', map: { 'njk': 'nunjucks' } }
-  },
-  message: { from: app.get('config').email.from },
-  send: true,
-  preview: false,
-  transport: nodemailer.createTransport({
-    host: app.get('config').email.host,
-    port: app.get('config').email.port,
-    security: app.get('config').email.security === 'TLS',
-    auth: { user: app.get('config').email.username, pass: app.get('config').email.password }
-  })
-});
 
 // Setting up the database connection.
 mongoose.Promise = global.Promise;
@@ -200,11 +130,56 @@ mongoose.connect(app.get('config').mongodb_uri, {
 }).then(() => { logger.debug('Connected to Database'); })
   .catch((error) => { logger.error(error); process.exit(1); });
 
+// Setting up the logger.
+app.use(morgan('dev', { stream: logger.writableStream }));
+
+//Enabling CORS
+app.use(cors());
+
+// Setting up the body and cookie parser.
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+
+// Defining a string that will be used to encode and decode cookies.
+const secret = app.get('config').cookie_secret;
+app.use(cookieParser(secret));
+// Setting up the session 
+app.use(session({
+  store: new MongoStore({ mongooseConnection: mongoose.connection }),
+  secret: secret,
+  resave: false,
+  saveUninitialized: false
+}));
+app.use(flash());
+
+//Static files
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Setting up the favicon.
+app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
+
+// Setting up automaticc LESS compilation to plain CSS
+app.use(sassMiddleware({
+  src: path.join(__dirname, 'public'),
+  dest: path.join(__dirname, 'public'),
+  importer: sassTildeImporter,
+  indentedSyntax: false, // true = .sass and false = .scss
+  sourceMap: true
+}));
+
+// Setting up nunjucks as the view engine for the express application using consolidate.
+app.engine('njk', cons.nunjucks);
+// Also set .njk as the default extension for view files.
+app.set('view engine', 'njk');
+app.set('views', path.join(__dirname, 'views'));
+
+//Method Override to Allow FAKE Request Methods:
+app.use(methodOverride('_method', { methods: ['GET', 'POST'] }));
+
 // Setting up user authentication
 app.use(passport.initialize());
 app.use(passport.session());
 
-const User = require('./models/user');
 passport.use(User.createStrategy());
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
@@ -228,6 +203,22 @@ app.use(passport.authenticate('remember-me'));
 passport.use('oauth2-resource-server-http-basic-strategy', oauth2ResourceServerHttpBasicStrategy);
 passport.use('oauth2-client-pkce', oauth2ClientPkceStrategy);
 passport.use('oauth2-refresh-token', oauth2RefreshTokenStrategy);
+
+app.locals.email = new EmailTemplate({
+  views: {
+    root: path.join(__dirname, 'emails'),
+    options: { extension: 'njk', map: { 'njk': 'nunjucks' } }
+  },
+  message: { from: app.get('config').email.from },
+  send: true,
+  preview: false,
+  transport: nodemailer.createTransport({
+    host: app.get('config').email.host,
+    port: app.get('config').email.port,
+    security: app.get('config').email.security === 'TLS',
+    auth: { user: app.get('config').email.username, pass: app.get('config').email.password }
+  })
+});
 
 // Setting up routes
 const index = require('./routes/index');

@@ -20,7 +20,7 @@ exports.verifyOAuth2 = function (req, res) {
                 issuer: config.open_id_connect.iss,
                 audience: response.client && response.client.id ? response.client.id : '',
                 subject: req.user && req.user.email ? req.user.email : '',
-                header: { jku: `${req.protocol}://${req.get('host')}/api/jwks` }
+                header: { jku: `${config.open_id_connect.iss}/api/jwks` }
             })
     });
 }

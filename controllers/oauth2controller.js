@@ -98,7 +98,8 @@ const generateIdToken = (client, user, ares, req, callback) => {
         expiresIn: (openIdConnectConfig.expires_in / 1000) + 's',
         issuer: openIdConnectConfig.iss,
         audience: client.id,
-        subject: user.email
+        subject: user.email,
+        header: { jku: `${config.open_id_connect.iss}/api/jwks` }
     }));
 }
 

@@ -9,7 +9,6 @@
 // https://github.com/jaredhanson/passport-remember-me
 // -----------------------------------------------------------------------------
 const passport = require('passport');
-const crypto = require('crypto');
 const { check, validationResult } = require('express-validator');
 // -----------------------------------------------------------------------------
 // TODO: Perhaps remove this require since it's not currently needed!
