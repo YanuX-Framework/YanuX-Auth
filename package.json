@@ -37,10 +37,10 @@
     "express": "^4.17.1",
     "express-session": "^1.17.1",
     "express-validator": "^6.5.0",
-    "jose": "^1.27.0",
+    "jose": "^1.27.1",
     "jquery": "^3.5.1",
     "method-override": "^3.0.0",
-    "mongoose": "^5.9.16",
+    "mongoose": "^5.9.19",
     "morgan": "^1.10.0",
     "node-sass-middleware": "^0.11.0",
     "node-sass-tilde-importer": "^1.0.2",
@@ -61,7 +61,7 @@
     "popper.js": "^1.16.1",
     "serve-favicon": "^2.5.0",
     "uid2": "0.0.3",
-    "validator": "^13.0.0",
+    "validator": "^13.1.1",
     "winston": "^3.2.1"
   },
   "devDependencies": {
