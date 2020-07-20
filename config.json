@@ -5,12 +5,12 @@
     "mongodb_uri": "mongodb://localhost:27017/yanux-auth",
     "zeroconf": false,
     "email": {
-        "from": "m5563id2xqb67hyl@ethereal.email",
+        "from": "abraham10@ethereal.email",
         "host": "smtp.ethereal.email",
         "port": 587,
         "security": "STARTTLS",
-        "username": "m5563id2xqb67hyl@ethereal.email",
-        "password": "WUvwvsEg9Q3cER5pMT"
+        "username": "abraham10@ethereal.email",
+        "password": "jXFhDm4DbH4mKTvPxX"
     },
     "cookie_secret": "efX4U4RtG1D0by7vWls6l5mYfAfpY4KKkGrWqIs1",
     "remember_me_token_expires_in": 2592000000,
