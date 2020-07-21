@@ -45,7 +45,7 @@
     "node-sass-middleware": "^0.11.0",
     "node-sass-tilde-importer": "^1.0.2",
     "nodemailer": "^6.4.10",
-    "nunjucks": "^3.2.1",
+    "nunjucks": "^3.2.2",
     "oauth2orize": "^1.11.0",
     "oauth2orize-openid": "^0.4.0",
     "oauth2orize-pkce": "^0.1.2",
