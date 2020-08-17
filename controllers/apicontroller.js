@@ -30,11 +30,11 @@ exports.verifyOAuth2 = function (req, res) {
 //   * https://www.oauth.com/oauth2-servers/token-introspection-endpoint/
 //   * https://tools.ietf.org/html/rfc7662
 // -----------------------------------------------------------------------------
-// TODO: Should I continue to use 'oauth2-resource-server-http-basic-strategy'
-// with a static config file or should I develop a more sophisticated solution?
+// TODO: Should I use 'oauth2-resource-server-http-basic-strategy' with a static
+// config file or should I develop a more sophisticated solution?
 // -----------------------------------------------------------------------------
 exports.oauth2Introspection = function (req, res, next) {
-    passport.authenticate('oauth2-resource-server-http-basic-strategy', {
+    passport.authenticate('client-basic' /*'oauth2-resource-server-http-basic-strategy'*/, {
         session: false,
         failWithError: true
     }, function (err, user) {
