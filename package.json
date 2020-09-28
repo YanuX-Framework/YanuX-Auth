@@ -8,7 +8,7 @@
     "email": "pedro@albuquerques.net",
     "url": "https://pedro.albuquerques.net"
   },
-  "license": "AGPL-3.0",
+  "license": "AGPL-3.0-or-later",
   "scripts": {
     "build": "npx webpack",
     "serve": "node ./bin/www",
