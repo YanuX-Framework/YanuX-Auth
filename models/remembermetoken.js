@@ -17,7 +17,6 @@ const RememberMeTokenSchema = new Schema({
 RememberMeTokenSchema.statics.MAX_REMEMBER_ME_TOKEN_AGE = maxRememberMeTokenAge;
 
 RememberMeTokenSchema.pre('validate', function (next) {
-    console.log('EXPIRATION DATE:', maxRememberMeTokenAge);
     if (!this.expirationDate) {
         this.expirationDate = new Date(new Date().getTime() + maxRememberMeTokenAge);
     }
