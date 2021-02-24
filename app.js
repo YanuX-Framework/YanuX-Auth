@@ -95,7 +95,7 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const session = require('express-session');
-const MongoStore = require('connect-mongo')(session);
+const MongoStore = require('connect-mongo').default;
 const flash = require('connect-flash');
 const path = require('path');
 const favicon = require('serve-favicon');
@@ -145,7 +145,7 @@ const secret = app.get('config').cookie_secret;
 app.use(cookieParser(secret));
 // Setting up the session 
 app.use(session({
-  store: new MongoStore({ mongooseConnection: mongoose.connection }),
+  store: MongoStore.create({ mongoUrl: app.get('config').mongodb_uri }),
   secret: secret,
   resave: false,
   saveUninitialized: false
