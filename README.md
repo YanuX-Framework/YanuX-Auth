@@ -3,5 +3,9 @@ This is the authentication and authorization server of the [__YanuX Framework__]
 
 A __Resource Server__ was also implemented to expose a service to check the validity of an access token as well as a standard [__OpenID Connect__](https://openid.net/specs/openid-connect-core-1_0.html) endpoint.
 
-## TODO:
+## Documentation
+### TODO:
 - Provide additional documentation.
+
+## License
+This work is licensed under [__GNU Affero General Public License Version 3__](LICENSE)
