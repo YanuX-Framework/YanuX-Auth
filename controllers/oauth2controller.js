@@ -96,7 +96,8 @@ const generateIdToken = (client, user, ares, req, callback) => {
     new SignJWT({ nonce: req.nonce, email: user.email })
         .setProtectedHeader({
             alg: 'RS256',
-            jku: `${config.open_id_connect.iss}/api/jwks`
+            jku: `${config.open_id_connect.iss}/api/jwks`,
+            kid: keys.private_jwk.kid
         })
         .setIssuedAt()
         .setIssuer(openIdConnectConfig.iss)

@@ -15,7 +15,8 @@ exports.verifyOAuth2 = function (req, res) {
     new SignJWT(response)
         .setProtectedHeader({
             alg: 'RS256',
-            jku: `${config.open_id_connect.iss}/api/jwks`
+            jku: `${config.open_id_connect.iss}/api/jwks`,
+            kid: keys.private_jwk.kid
         })
         .setIssuedAt()
         .setIssuer(config.open_id_connect.iss)
