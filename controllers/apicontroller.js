@@ -1,7 +1,7 @@
 'use strict';
 
 const passport = require('passport');
-const jose = require('jose');
+const { SignJWT } = require('jose/jwt/sign')
 const AccessToken = require('../models/accesstoken');
 const configure = require('../configure');
 const config = configure();
@@ -11,18 +11,20 @@ const config = configure();
 // -----------------------------------------------------------------------------
 exports.verifyOAuth2 = function (req, res) {
     const response = req.authInfo;
-    res.json({
-        response,
-        jwt: jose.JWT.sign(response, req.app.get('config').keys.private_jwk,
-            {
-                algorithm: 'RS256',
-                expiresIn: (config.open_id_connect.expires_in / 1000) + 's',
-                issuer: config.open_id_connect.iss,
-                audience: response.client && response.client.id ? response.client.id : '',
-                subject: req.user && req.user.email ? req.user.email : '',
-                header: { jku: `${config.open_id_connect.iss}/api/jwks` }
-            })
-    });
+    const keys = req.app.get('config').keys
+    new SignJWT(response)
+        .setProtectedHeader({
+            alg: 'RS256',
+            jku: `${config.open_id_connect.iss}/api/jwks`
+        })
+        .setIssuedAt()
+        .setIssuer(config.open_id_connect.iss)
+        .setAudience(response.client && response.client.id ? response.client.id : '')
+        .setExpirationTime((config.open_id_connect.expires_in / 1000) + 's')
+        .setSubject(req.user && req.user.email ? req.user.email : '')
+        .sign(keys.private_key)
+        .then(jwt => { res.json({ response, jwt }) })
+        .catch(e => { res.status(500); res.json(e); })
 }
 
 // -----------------------------------------------------------------------------
@@ -62,9 +64,9 @@ exports.oauth2Introspection = function (req, res, next) {
 }
 
 exports.publicKey = function (req, res) {
-    res.set('Content-Type', 'application/x-pem-file').send(req.app.get('config').keys.public_key);
+    res.set('Content-Type', 'application/x-pem-file').send(req.app.get('config').keys.public_key_pem);
 }
 
 exports.jwks = function (req, res) {
-    res.json(config.keys.keystore.toJWKS());
+    res.json({ keys: [config.keys.public_jwk] })
 }

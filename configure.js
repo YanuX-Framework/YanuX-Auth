@@ -2,7 +2,10 @@
 
 const fs = require('fs');
 const path = require('path');
-const jose = require('jose');
+const crypto = require('crypto');
+
+const { fromKeyLike } = require('jose/jwk/from_key_like');
+const { calculateThumbprint } = require('jose/jwk/thumbprint');
 
 // Normalize a port into a number, string, or false.
 const normalizePort = val => {
@@ -43,14 +46,30 @@ config.email.password = process.env.EMAIL_PASSWORD || config.email.password;
 
 // Config Keys
 config.keys = config.keys || {};
-config.keys.private_key = process.env.KEYS_PRIVATE_KEY ? process.env.KEYS_PRIVATE_KEY : fs.readFileSync(path.normalize(config.keys.private_key_path), 'utf8');
-config.keys.public_key = process.env.KEYS_PUBLIC_KEY ? process.env.KEYS_PUBLIC_KEY : fs.readFileSync(path.normalize(config.keys.public_key_path), 'utf8');
+config.keys.private_key_pem = process.env.KEYS_PRIVATE_KEY ? process.env.KEYS_PRIVATE_KEY : fs.readFileSync(path.normalize(config.keys.private_key_path), 'utf8');
+config.keys.public_key_pem = process.env.KEYS_PUBLIC_KEY ? process.env.KEYS_PUBLIC_KEY : fs.readFileSync(path.normalize(config.keys.public_key_path), 'utf8');
 
-config.keys.keystore = new jose.JWKS.KeyStore();
-config.keys.private_jwk = jose.JWK.asKey(config.keys.private_key);
-config.keys.public_jwk = jose.JWK.asKey(config.keys.public_key);
-config.keys.keystore.add(config.keys.private_jwk);
-//config.keys.keystore.add(config.keys.public_jwk);
+config.keys.private_key = crypto.createPrivateKey(config.keys.private_key_pem);
+config.keys.public_key = crypto.createPublicKey(config.keys.public_key_pem);
+
+config.keys.private_jwk = fromKeyLike(config.keys.private_key);
+config.keys.public_jwk = fromKeyLike(config.keys.private_key);
+
+Promise.all([
+    fromKeyLike(crypto.createPrivateKey(config.keys.private_key_pem)),
+    fromKeyLike(crypto.createPublicKey(config.keys.public_key_pem))
+]).then(keys => {
+    config.keys.private_jwk = keys[0];
+    config.keys.public_jwk = keys[1];
+    return Promise.all([
+        calculateThumbprint(config.keys.private_jwk),
+        calculateThumbprint(config.keys.public_jwk)
+    ])
+}).then(tps => {
+    config.keys.private_jwk.kid = tps[0];
+    config.keys.public_jwk.kid = tps[1];
+    console.log('Loaded Private and Public Keys');
+}).catch(e => console.log('Error while loading Private and Public Keys:', e));
 
 //Config Cookie Secret
 config.name = process.env.COOKIE_SECRET || config.cookie_secret;

@@ -18,7 +18,7 @@ const oauth2orizeOptions = {
         query: require('oauth2orize/lib/response/query')
     }
 }
-const jose = require('jose');
+
 const User = require('../models/user');
 const Client = require('../models/client');
 const AccessToken = require('../models/accesstoken');
@@ -93,14 +93,19 @@ const OAuth2ServerAuthorization = [
 // -------------------------------------------------------------------------- //
 // Function that generates an ID Token
 const generateIdToken = (client, user, ares, req, callback) => {
-    callback(null, jose.JWT.sign({ nonce: req.nonce, email: user.email }, keys.private_jwk, {
-        algorithm: 'RS256',
-        expiresIn: (openIdConnectConfig.expires_in / 1000) + 's',
-        issuer: openIdConnectConfig.iss,
-        audience: client.id,
-        subject: user.email,
-        header: { jku: `${config.open_id_connect.iss}/api/jwks` }
-    }));
+    new SignJWT({ nonce: req.nonce, email: user.email })
+        .setProtectedHeader({
+            alg: 'RS256',
+            jku: `${config.open_id_connect.iss}/api/jwks`
+        })
+        .setIssuedAt()
+        .setIssuer(openIdConnectConfig.iss)
+        .setAudience(client.id)
+        .setExpirationTime((openIdConnectConfig.expires_in / 1000) + 's')
+        .setSubject(user.email)
+        .sign(keys.private_key)
+        .then(jwt => callback(null, jwt))
+        .catch(e => callback(e))
 }
 
 // Generates and Access Token
