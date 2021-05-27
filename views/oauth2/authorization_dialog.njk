@@ -5,9 +5,9 @@
         <p>Do you allow <strong>{{ client.name }}</strong> to have <strong>full access</strong> to your account?</p>
         <form action="/oauth2/authorize" method="post">
             <input name="transaction_id" type="hidden" value="{{ transactionID }}">
-            <div>
-                <input type="submit" class="btn btn-success btn-lg btn-block" value="Allow" id="allow">
-                <input type="submit" class="btn btn-danger btn-lg btn-block" value="Deny" name="cancel" id="deny">
+            <div class="d-grid gap-2">
+                <input type="submit" class="btn btn-success btn-lg" value="Allow" id="allow">
+                <input type="submit" class="btn btn-danger btn-lg" value="Deny" name="cancel" id="deny">
             </div>
         </form>
     </div>

@@ -12,20 +12,24 @@
             </div>
         {% endif %}
         <form method="POST" action="/auth/login">
-            <div class="form-group">
-                <label for="email">Email address</label>
+            <div class="mb-3">
+                <label class="form-label" for="email">Email address</label>
                 <input type="email" class="form-control" id="email" name="email">
             </div>
-            <div class="form-group">
-                <label for="password">Password</label>
+            <div class="mb-3">
+                <label class="form-label" for="password">Password</label>
                 <input type="password" class="form-control" id="password" name="password">
             </div>
             <div class="form-check">
                 <input type="checkbox" class="form-check-input" id="remember_me" name="remember_me">
-                <label class="form-check-label" for="remember_me">Remember me</label>
+                <label class="form-label" class="form-check-label" for="remember_me">Remember me</label>
             </div>
-            <button type="submit" class="btn btn-lg btn-primary btn-block mt-2">Login</button>
+            <div class="d-grid">
+                <button type="submit" class="btn btn-lg btn-primary mt-2">Login</button>
+            <div>
         </form>
-        <a class="btn btn-block btn-secondary btn-sm mt-2" href="/auth/reset_password">Reset password</a>
+        <div class="d-grid">
+            <a class="btn btn-secondary btn-sm mt-2" href="/auth/reset_password">Reset password</a>
+        </div>
     </div>
 {% endblock %}

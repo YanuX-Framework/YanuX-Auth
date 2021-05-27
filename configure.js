@@ -52,12 +52,9 @@ config.keys.public_key_pem = process.env.KEYS_PUBLIC_KEY ? process.env.KEYS_PUBL
 config.keys.private_key = crypto.createPrivateKey(config.keys.private_key_pem);
 config.keys.public_key = crypto.createPublicKey(config.keys.public_key_pem);
 
-config.keys.private_jwk = fromKeyLike(config.keys.private_key);
-config.keys.public_jwk = fromKeyLike(config.keys.private_key);
-
 Promise.all([
-    fromKeyLike(crypto.createPrivateKey(config.keys.private_key_pem)),
-    fromKeyLike(crypto.createPublicKey(config.keys.public_key_pem))
+    fromKeyLike(config.keys.private_key),
+    fromKeyLike(config.keys.public_key)
 ]).then(keys => {
     config.keys.private_jwk = keys[0];
     config.keys.public_jwk = keys[1];
@@ -69,7 +66,7 @@ Promise.all([
     config.keys.private_jwk.kid = tps[0];
     config.keys.public_jwk.kid = tps[1];
     console.log('Loaded Private and Public Keys');
-}).catch(e => console.log('Error while loading Private and Public Keys:', e));
+}).catch(e => console.error('Error while loading Private and Public Keys:', e));
 
 //Config Cookie Secret
 config.name = process.env.COOKIE_SECRET || config.cookie_secret;
