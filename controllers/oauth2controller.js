@@ -5,6 +5,7 @@
 //   * https://www.npmjs.com/package/oauth2orize-device-code
 //   * https://github.com/jaredhanson/oauth2orize-device-code
 
+const { SignJWT } = require('jose/jwt/sign')
 const configure = require('../configure');
 const config = configure();
 const openIdConnectConfig = config.open_id_connect;
