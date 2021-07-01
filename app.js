@@ -99,8 +99,9 @@ const MongoStore = require('connect-mongo');
 const flash = require('connect-flash');
 const path = require('path');
 const favicon = require('serve-favicon');
-const sassMiddleware = require('node-sass-middleware');
-const sassTildeImporter = require('node-sass-tilde-importer');
+//const sassMiddleware = require('node-sass-middleware');
+//const sassTildeImporter = require('node-sass-tilde-importer');
+const sassmiddleware = require('./utils/sassmiddleware');
 const cons = require('consolidate');
 const methodOverride = require('method-override');
 const passport = require('passport');
@@ -158,14 +159,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Setting up the favicon.
 app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 
-// Setting up automaticc LESS compilation to plain CSS
-app.use(sassMiddleware({
-  src: path.join(__dirname, 'public'),
-  dest: path.join(__dirname, 'public'),
-  importer: sassTildeImporter,
-  indentedSyntax: false, // true = .sass and false = .scss
-  sourceMap: true
-}));
+app.use(sassmiddleware({
+  src: path.join(__dirname, 'public')
+}))
 
 // Setting up nunjucks as the view engine for the express application using consolidate.
 app.engine('njk', cons.nunjucks);
