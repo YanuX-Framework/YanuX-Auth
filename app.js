@@ -124,10 +124,10 @@ configure(app);
 // Setting up the database connection.
 mongoose.Promise = global.Promise;
 mongoose.connect(app.get('config').mongodb_uri, {
-  useNewUrlParser: true,
-  useFindAndModify: false,
-  useCreateIndex: true,
-  useUnifiedTopology: true
+  // useNewUrlParser: true,
+  // useFindAndModify: false,
+  // useCreateIndex: true,
+  // useUnifiedTopology: true
 }).then(() => { logger.debug('Connected to Database'); })
   .catch((error) => { logger.error(error); process.exit(1); });
 
