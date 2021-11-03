@@ -62,7 +62,7 @@
     "sass": "^1.35.1",
     "serve-favicon": "^2.5.0",
     "uid2": "^1.0.0",
-    "validator": "^13.5.2",
+    "validator": "^13.7.0",
     "winston": "^3.3.3"
   },
   "devDependencies": {
