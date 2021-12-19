@@ -18,7 +18,7 @@
     "watch:server": "npx nodemon ./bin/www"
   },
   "dependencies": {
-    "@fortawesome/fontawesome-free": "^5.15.2",
+    "@fortawesome/fontawesome-free": "^5.15.4",
     "@fortawesome/fontawesome-svg-core": "^1.2.34",
     "@fortawesome/free-brands-svg-icons": "^5.15.2",
     "@fortawesome/free-regular-svg-icons": "^5.15.2",
@@ -38,8 +38,7 @@
     "express": "^4.17.1",
     "express-session": "^1.17.1",
     "express-validator": "^6.10.0",
-    "jose": "^3.12.2",
-    "jose-node-cjs-runtime": "^3.12.2",
+    "jose": "^4.3.7",
     "jquery": "^3.5.1",
     "method-override": "^3.0.0",
     "mongoose": "^6.0.7",
@@ -73,6 +72,6 @@
     "webpack-cli": "^4.5.0"
   },
   "engines": {
-    "node": "14.x"
+    "node": "16.x"
   }
 }

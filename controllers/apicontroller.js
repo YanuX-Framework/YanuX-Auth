@@ -1,7 +1,7 @@
 'use strict';
 
 const passport = require('passport');
-const { SignJWT } = require('jose/jwt/sign')
+const { SignJWT } = require('jose');
 const AccessToken = require('../models/accesstoken');
 const configure = require('../configure');
 const config = configure();

@@ -4,8 +4,8 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 
-const { fromKeyLike } = require('jose/jwk/from_key_like');
-const { calculateThumbprint } = require('jose/jwk/thumbprint');
+const { exportJWK } = require('jose');
+const { calculateJwkThumbprint } = require('jose');
 
 // Normalize a port into a number, string, or false.
 const normalizePort = val => {
@@ -53,14 +53,14 @@ config.keys.private_key = crypto.createPrivateKey(config.keys.private_key_pem);
 config.keys.public_key = crypto.createPublicKey(config.keys.public_key_pem);
 
 Promise.all([
-    fromKeyLike(config.keys.private_key),
-    fromKeyLike(config.keys.public_key)
+    exportJWK(config.keys.private_key),
+    exportJWK(config.keys.public_key)
 ]).then(keys => {
     config.keys.private_jwk = keys[0];
     config.keys.public_jwk = keys[1];
     return Promise.all([
-        calculateThumbprint(config.keys.private_jwk),
-        calculateThumbprint(config.keys.public_jwk)
+        calculateJwkThumbprint(config.keys.private_jwk),
+        calculateJwkThumbprint(config.keys.public_jwk)
     ])
 }).then(tps => {
     config.keys.private_jwk.kid = tps[0];
