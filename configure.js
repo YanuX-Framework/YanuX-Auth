@@ -4,8 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 
-const { exportJWK } = require('jose');
-const { calculateJwkThumbprint } = require('jose');
+const { exportJWK, calculateJwkThumbprint } = require('jose');
 
 // Normalize a port into a number, string, or false.
 const normalizePort = val => {
