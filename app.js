@@ -173,7 +173,7 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(methodOverride('_method', { methods: ['GET', 'POST'] }));
 
 // Setting up user authentication
-app.use(passport.initialize());
+app.use(passport.initialize({ compat: true }));
 app.use(passport.session());
 
 passport.use(User.createStrategy());

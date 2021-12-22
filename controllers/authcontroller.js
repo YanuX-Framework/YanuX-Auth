@@ -239,7 +239,7 @@ module.exports.logout = function (req, res, next) {
         res.redirect('/');
     }
     if (rememberMeCookie) {
-        RememberMeToken.remove({
+        RememberMeToken.deleteMany({
             user: req.user,
             token: RememberMeToken.hashToken(rememberMeCookie.token)
         }).then(() => logout(req, res));
