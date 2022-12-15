@@ -35,7 +35,7 @@
     "cors": "^2.8.5",
     "dnssd": "^0.4.1",
     "email-templates": "^8.0.3",
-    "express": "^4.17.1",
+    "express": "^4.17.3",
     "express-session": "^1.17.1",
     "express-validator": "^6.10.0",
     "jose": "^4.3.7",
